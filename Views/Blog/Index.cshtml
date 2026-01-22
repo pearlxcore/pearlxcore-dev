@@ -1,0 +1,381 @@
+﻿@model pearlxcore.dev.Models.PaginatedList<pearlxcore.dev.Models.Entities.Post>
+@{
+    ViewData["MetaDescription"] = "Articles on homelab infrastructure, ASP.NET Core, and personal engineering projects.";
+    ViewData["Title"] = "Blog";
+    var adminProfile = ViewData["AdminProfile"] as pearlxcore.dev.Models.Entities.AdminProfile;
+    var filterType = ViewData["FilterType"] as string;
+    var filterSlug = ViewData["FilterSlug"] as string;
+}
+
+<div class="blog-container">
+    <div class="blog-header">
+        <h1 class="blog-header__title">Welcome to pearlxcore's weblog</h1>
+        <p class="blog-subtitle">A personal blog documenting homelab experiments, software engineering, and technical journeys.</p>
+    </div>
+
+    @* Search Bar *@
+    <div class="blog-search-section">
+        <form method="get" action="/blog/search" class="d-flex gap-2">
+            <input type="search" 
+                   name="q" 
+                   class="form-control form-control-lg" 
+                   placeholder="🔍 Search articles..."
+                   aria-label="Search posts">
+            <button type="submit" class="btn btn-primary btn-lg">Search</button>
+        </form>
+    </div>
+
+    @* Filter Indicator *@
+    @if (!string.IsNullOrEmpty(filterType) && !string.IsNullOrEmpty(filterSlug))
+    {
+        <div class="blog-filter">
+            <span class="blog-filter__label">Filtering by</span>
+            <span class="blog-filter__badge badge bg-info">
+                @(filterType == "category" ? "Category: " : "Tag: ")@filterSlug
+            </span>
+            <a asp-controller="Blog" asp-action="Index" class="blog-filter__clear">Clear Filter</a>
+        </div>
+    }
+
+    @* Main Content with Sidebar *@
+    <div class="blog-layout">
+        <div class="blog-main">
+        @if (!Model.Items.Any())
+        {
+            <div class="alert alert-info text-center py-5">
+                <h4>No Articles Yet</h4>
+                <p class="mb-2">There are no published articles to display at the moment.</p>
+                <p class="mb-0 text-muted">Come back soon for new content!</p>
+            </div>
+        }
+        else
+        {
+            var featuredPost = Model.Items.First();
+        var featuredWordCount = featuredPost.Content?.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
+        var featuredReadingTime = Math.Ceiling(featuredWordCount / 200.0);
+        
+        if (Model.PageIndex == 1)
+        {
+            <article class="featured-post">
+                @if (!string.IsNullOrEmpty(featuredPost.ImageUrl))
+                {
+                    <a asp-controller="Blog" asp-action="Post" asp-route-slug="@featuredPost.Slug" class="featured-post__image-link">
+                        <img src="@featuredPost.ImageUrl" alt="@featuredPost.Title" class="featured-post__image" />
+                    </a>
+                }
+                <div class="featured-post__content">
+                    <h2 class="featured-post__title">
+                        <a asp-controller="Blog" asp-action="Post" asp-route-slug="@featuredPost.Slug">
+                            @featuredPost.Title
+                        </a>
+                    </h2>
+                    @if (!string.IsNullOrEmpty(featuredPost.Summary))
+                    {
+                        <p class="featured-post__excerpt">@featuredPost.Summary</p>
+                    }
+                    <div class="featured-post__meta">
+                        <span class="author">By @(adminProfile?.Name ?? featuredPost.Author.UserName)</span>
+                        <span class="divider">•</span>
+                        <span class="date">@featuredPost.PublishedAt?.ToString("MMMM dd, yyyy")</span>
+                        <span class="divider">•</span>
+                        <span class="reading-time">@featuredReadingTime min read</span>
+                    </div>
+                </div>
+            </article>
+            
+            <div class="posts-divider"></div>
+        }
+
+        @* Regular Posts Grid *@
+        <div class="posts-grid">
+            @foreach (var post in Model.Items.Skip(Model.PageIndex == 1 ? 1 : 0))
+            {
+                var wordCount = post.Content?.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
+                var readingTime = Math.Ceiling(wordCount / 200.0);
+                
+                <article class="post-card">
+                    @if (!string.IsNullOrEmpty(post.ImageUrl))
+                    {
+                        <a asp-controller="Blog" asp-action="Post" asp-route-slug="@post.Slug" class="post-card__image-link">
+                            <img src="@post.ImageUrl" alt="@post.Title" class="post-card__image" />
+                        </a>
+                    }
+                    <div class="post-card__content">
+                        <h3 class="post-card__title">
+                            <a asp-controller="Blog" asp-action="Post" asp-route-slug="@post.Slug">
+                                @post.Title
+                            </a>
+                        </h3>
+                        @if (!string.IsNullOrEmpty(post.Summary))
+                        {
+                            <p class="post-card__excerpt">@post.Summary</p>
+                        }
+                        <div class="post-card__meta">
+                            <span class="author">@(adminProfile?.Name ?? post.Author.UserName)</span>
+                            <span class="divider">•</span>
+                            <span class="date">@post.PublishedAt?.ToString("MMM dd")</span>
+                            <span class="divider">•</span>
+                            <span class="reading-time">@readingTime min</span>
+                        </div>
+                        
+                        @* Categories and Tags *@
+                        @if (post.PostCategories.Any() || post.PostTags.Any())
+                        {
+                            <div class="post-taxonomy">
+                                @foreach (var c in post.PostCategories.Select(pc => pc.Category))
+                                {
+                                    <a asp-controller="Blog"
+                                       asp-action="Category"
+                                       asp-route-slug="@c.Slug"
+                                       class="category-chip">
+                                        @c.Name
+                                    </a>
+                                }
+                                @foreach (var t in post.PostTags.Select(pt => pt.Tag))
+                                {
+                                    <a asp-controller="Blog"
+                                       asp-action="Tag"
+                                       asp-route-slug="@t.Slug"
+                                       class="tag-chip">
+                                        @t.Name
+                                    </a>
+                                }
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+
+        @* Pagination Controls *@
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Blog pagination" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    @* Previous Button *@
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                        @if (!string.IsNullOrEmpty(filterType) && !string.IsNullOrEmpty(filterSlug))
+                        {
+                            <a class="page-link" 
+                               asp-controller="Blog" 
+                               asp-action="@(filterType == "category" ? "Category" : "Tag")"
+                               asp-route-slug="@filterSlug"
+                               asp-route-page="@(Model.PageIndex - 1)"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo; Previous</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="page-link" 
+                               asp-controller="Blog" 
+                               asp-action="Index" 
+                               asp-route-page="@(Model.PageIndex - 1)"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo; Previous</span>
+                            </a>
+                        }
+                    </li>
+
+                    @* Page Numbers *@
+                    @{
+                        var startPage = Math.Max(1, Model.PageIndex - 2);
+                        var endPage = Math.Min(Model.TotalPages, Model.PageIndex + 2);
+                    }
+
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            @if (!string.IsNullOrEmpty(filterType) && !string.IsNullOrEmpty(filterSlug))
+                            {
+                                <a class="page-link" 
+                                   asp-controller="Blog" 
+                                   asp-action="@(filterType == "category" ? "Category" : "Tag")"
+                                   asp-route-slug="@filterSlug"
+                                   asp-route-page="1">1</a>
+                            }
+                            else
+                            {
+                                <a class="page-link" asp-controller="Blog" asp-action="Index" asp-route-page="1">1</a>
+                            }
+                        </li>
+                        @if (startPage > 2)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    @for (var i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            @if (!string.IsNullOrEmpty(filterType) && !string.IsNullOrEmpty(filterSlug))
+                            {
+                                <a class="page-link" 
+                                   asp-controller="Blog" 
+                                   asp-action="@(filterType == "category" ? "Category" : "Tag")"
+                                   asp-route-slug="@filterSlug"
+                                   asp-route-page="@i">@i</a>
+                            }
+                            else
+                            {
+                                <a class="page-link" asp-controller="Blog" asp-action="Index" asp-route-page="@i">@i</a>
+                            }
+                        </li>
+                    }
+
+                    @if (endPage < Model.TotalPages)
+                    {
+                        @if (endPage < Model.TotalPages - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                        <li class="page-item">
+                            @if (!string.IsNullOrEmpty(filterType) && !string.IsNullOrEmpty(filterSlug))
+                            {
+                                <a class="page-link" 
+                                   asp-controller="Blog" 
+                                   asp-action="@(filterType == "category" ? "Category" : "Tag")"
+                                   asp-route-slug="@filterSlug"
+                                   asp-route-page="@Model.TotalPages">@Model.TotalPages</a>
+                            }
+                            else
+                            {
+                                <a class="page-link" asp-controller="Blog" asp-action="Index" asp-route-page="@Model.TotalPages">@Model.TotalPages</a>
+                            }
+                        </li>
+                    }
+
+                    @* Next Button *@
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                        @if (!string.IsNullOrEmpty(filterType) && !string.IsNullOrEmpty(filterSlug))
+                        {
+                            <a class="page-link" 
+                               asp-controller="Blog" 
+                               asp-action="@(filterType == "category" ? "Category" : "Tag")"
+                               asp-route-slug="@filterSlug"
+                               asp-route-page="@(Model.PageIndex + 1)"
+                               aria-label="Next">
+                                <span aria-hidden="true">Next &raquo;</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="page-link" 
+                               asp-controller="Blog" 
+                               asp-action="Index" 
+                               asp-route-page="@(Model.PageIndex + 1)"
+                               aria-label="Next">
+                                <span aria-hidden="true">Next &raquo;</span>
+                            </a>
+                        }
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="text-center text-muted mt-3">
+                <small>Showing @((Model.PageIndex - 1) * Model.PageSize + 1) to @Math.Min(Model.PageIndex * Model.PageSize, Model.TotalCount) of @Model.TotalCount posts</small>
+            </div>
+        }
+        }
+        </div>
+
+        @* Sidebar - Categories & Tags *@
+        <aside class="blog-sidebar">
+            <div class="blog-sidebar__inner">
+                <h3 class="blog-sidebar__heading">Categories</h3>
+                <div class="categories-list">
+                    @{
+                        var allPublishedPosts = (ViewData["AllPublishedPosts"] as IEnumerable<pearlxcore.dev.Models.Entities.Post>) ?? Enumerable.Empty<pearlxcore.dev.Models.Entities.Post>();
+                        var postCount = allPublishedPosts.Count();
+                        var allCategories = new Dictionary<string, (string name, int count)>();
+                        
+                        foreach (var post in allPublishedPosts)
+                        {
+                            if (post?.PostCategories != null && post.PostCategories.Any())
+                            {
+                                foreach (var pc in post.PostCategories.Where(pc => pc?.Category != null))
+                                {
+                                    var slug = pc.Category.Slug;
+                                    if (!allCategories.ContainsKey(slug))
+                                        allCategories[slug] = (pc.Category.Name, 0);
+                                    
+                                    var tuple = allCategories[slug];
+                                    allCategories[slug] = (tuple.name, tuple.count + 1);
+                                }
+                            }
+                        }
+                    }
+                    @if (allCategories.Count > 0)
+                    {
+                        @foreach (var cat in allCategories.OrderByDescending(x => x.Value.count))
+                        {
+                            <a asp-controller="Blog" asp-action="Category" asp-route-slug="@cat.Key" class="category-chip">
+                                <span>@cat.Value.name</span>
+                                <span class="category-chip__count">(@cat.Value.count)</span>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <p class="blog-sidebar__empty">No categories yet</p>
+                    }
+                </div>
+
+                <h3 class="blog-sidebar__heading">Tags</h3>
+                <div class="tags-list">
+                    @{
+                        var allTags = new Dictionary<string, (string name, int count)>();
+                        foreach (var post in allPublishedPosts)
+                        {
+                            if (post?.PostTags != null && post.PostTags.Any())
+                            {
+                                foreach (var pt in post.PostTags.Where(pt => pt?.Tag != null))
+                                {
+                                    var slug = pt.Tag.Slug;
+                                    if (!allTags.ContainsKey(slug))
+                                        allTags[slug] = (pt.Tag.Name, 0);
+                                    
+                                    var tuple = allTags[slug];
+                                    allTags[slug] = (tuple.name, tuple.count + 1);
+                                }
+                            }
+                        }
+                    }
+                    @if (allTags.Count > 0)
+                    {
+                        @foreach (var tag in allTags.OrderByDescending(x => x.Value.count))
+                        {
+                            <a asp-controller="Blog" asp-action="Tag" asp-route-slug="@tag.Key" class="tag-chip">
+                                @tag.Value.name
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <p class="blog-sidebar__empty">No tags yet</p>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    @* Back to Top Button *@
+    <button id="scrollTopBtn" 
+            onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+            aria-label="Scroll to top">
+        ↑
+    </button>
+
+    <script>
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollTopBtn.style.opacity = '1';
+                scrollTopBtn.style.visibility = 'visible';
+            } else {
+                scrollTopBtn.style.opacity = '0';
+                scrollTopBtn.style.visibility = 'hidden';
+            }
+        });
+    </script>
+</div>

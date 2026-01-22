@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="home-content">
+    <section class="home-hero">
+        <h1 class="home-hero__title">Welcome to pearlxcore.dev</h1>
+        <p class="home-hero__subtitle">A personal blog documenting homelab experiments, software engineering, and technical journeys.</p>
+        <a asp-controller="Blog" asp-action="Index" class="btn btn-primary btn-lg">Explore Articles →</a>
+    </section>
+
+    <section class="home-topics">
+        <h2 class="home-topics__title">Featured Topics</h2>
+        <div class="topics-grid">
+            <div class="topic-card">
+                <h3 class="topic-card__title">📦 Homelab</h3>
+                <p class="topic-card__desc">Insights on self-hosted infrastructure and lab experiments</p>
+            </div>
+            <div class="topic-card">
+                <h3 class="topic-card__title">💻 Software Engineering</h3>
+                <p class="topic-card__desc">Technical articles on development best practices</p>
+            </div>
+            <div class="topic-card">
+                <h3 class="topic-card__title">🔧 DevOps</h3>
+                <p class="topic-card__desc">Tools and techniques for deployment and operations</p>
+            </div>
+        </div>
+    </section>
+</div>

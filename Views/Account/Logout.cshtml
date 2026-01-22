@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Logout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h1 class="card-title mb-4">Logout</h1>
+                    <p class="card-text mb-4">Are you sure you want to logout?</p>
+                    
+                    <form method="post" asp-action="LogoutConfirmed" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">Yes, Logout</button>
+                    </form>
+                    
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

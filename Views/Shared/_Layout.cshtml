@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="description" content="@ViewData["MetaDescription"] ?? "pearlxcore.dev — a personal blog documenting homelab experiments, software engineering, and technical journeys."" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - pearlxcore.dev</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <header class="header header-fixed" id="mainHeader">
+        <div class="header-container">
+            <a class="header-logo" asp-controller="Home" asp-action="Index">pearlxcore.dev</a>
+            
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <nav class="header-nav" id="nav">
+                <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
+                <a asp-controller="Blog" asp-action="Index" class="nav-link">Blog</a>
+                <a asp-controller="Home" asp-action="About" class="nav-link">About</a>
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn-nav">Admin</a>
+                    }
+                    <a asp-controller="Account" asp-action="Logout" class="btn-nav btn-logout">Logout</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="newsletter-section">
+                <div class="newsletter-signup">
+                    <div class="newsletter-header">
+                        <h4 class="newsletter-title">Subscribe to updates</h4>
+                        <p class="newsletter-subtitle">Get the latest articles delivered to your inbox.</p>
+                    </div>
+                    
+                    @if (TempData["NewsletterSuccess"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            ✓ @TempData["NewsletterSuccess"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["NewsletterError"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            ✗ @TempData["NewsletterError"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    <form asp-controller="Newsletter" asp-action="Subscribe" method="post" class="newsletter-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <div class="newsletter-input-group">
+                            <input type="email" 
+                                   name="email" 
+                                   class="newsletter-input" 
+                                   placeholder="your@email.com" 
+                                   required 
+                                   aria-label="Email address" />
+                            <button type="submit" class="newsletter-btn">Subscribe</button>
+                        </div>
+                        <p class="newsletter-disclaimer">No spam, just great content. Unsubscribe anytime.</p>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-copyright">&copy; 2026 pearlxcore.dev. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Reading progress bar
+        let lastScrollTop = 0;
+        const header = document.getElementById('mainHeader');
+        const progressBar = document.getElementById('readingProgress');
+        
+        window.addEventListener('scroll', function() {
+            // Update progress bar
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            progressBar.style.width = scrollPercent + '%';
+            
+            // Hide/show header on scroll
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down & past threshold
+                header.classList.add('header-hidden');
+            } else {
+                // Scrolling up
+                header.classList.remove('header-hidden');
+            }
+            lastScrollTop = scrollTop;
+        });
+
+        
+        const hamburger = document.getElementById('hamburger');
+        const nav = document.getElementById('nav');
+
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('open');
+        });
+
+        // Close menu on nav link click
+        nav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (nav.classList.contains('open')) {
+                    nav.classList.remove('open');
+                }
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (nav.classList.contains('open')) {
+                if (!nav.contains(e.target) && !hamburger.contains(e.target)) {
+                    nav.classList.remove('open');
+                }
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - pearlxcore.dev</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <header class="header admin-header">
+        <div class="header-content">
+            <a class="logo" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">pearlxcore.dev</a>
+            <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="admin-nav" id="adminNav">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a asp-area="Admin" asp-controller="Posts" asp-action="Index">Posts</a>
+                <a asp-area="Admin" asp-controller="Categories" asp-action="Index">Categories</a>
+                <a asp-area="Admin" asp-controller="Tags" asp-action="Index">Tags</a>
+                <a asp-area="Admin" asp-controller="Media" asp-action="Index">Media</a>
+                <a asp-area="Admin" asp-controller="Logs" asp-action="Index">Logs</a>
+                <a asp-area="Admin" asp-controller="Newsletter" asp-action="Index">Newsletter</a>
+                <a asp-area="" asp-controller="Blog" asp-action="Index">Blog</a>
+                <a asp-area="Admin" asp-controller="Profile" asp-action="About">About Me</a>
+                <a asp-area="" asp-controller="Account" asp-action="Logout" class="logout-btn">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-copyright">&copy; 2026 pearlxcore.dev</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Admin hamburger menu
+        const adminHamburger = document.getElementById('adminHamburger');
+        const adminNav = document.getElementById('adminNav');
+
+        if (adminHamburger && adminNav) {
+            adminHamburger.addEventListener('click', () => {
+                const isOpen = adminNav.classList.toggle('open');
+                adminHamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            // Close menu on nav link click
+            adminNav.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (adminNav.classList.contains('open')) {
+                        adminNav.classList.remove('open');
+                        adminHamburger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (adminNav.classList.contains('open')) {
+                    if (!adminNav.contains(e.target) && !adminHamburger.contains(e.target)) {
+                        adminNav.classList.remove('open');
+                        adminHamburger.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

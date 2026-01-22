@@ -1,0 +1,291 @@
+@model pearlxcore.dev.ViewModels.Admin.Posts.PostFormViewModel
+@using pearlxcore.dev.Models.Entities
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit Post";
+}
+
+<div class="admin-page">
+    <div class="page-header mb-4">
+        <h1 class="page-title">Edit Post</h1>
+        <p class="page-subtitle">Update your blog content</p>
+    </div>
+
+    <form method="post" class="post-form" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Basic Information Section -->
+        <div class="post-form-section">
+            <h3 class="post-form-section__title">
+                <i class="fas fa-heading"></i>Basic Information
+            </h3>
+
+            <div class="form-group">
+                <label asp-for="Title">Title</label>
+                <input asp-for="Title" class="form-control" placeholder="Enter post title" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Slug">URL Slug</label>
+                <input asp-for="Slug" class="form-control" placeholder="Leave empty to auto-generate" />
+                <span asp-validation-for="Slug" class="text-danger"></span>
+                <small>Leave empty to auto-generate from title</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Summary">Summary</label>
+                <textarea asp-for="Summary" class="form-control" placeholder="Brief description (optional)"></textarea>
+                <small>Used in blog listings and metadata</small>
+            </div>
+        </div>
+
+        <!-- Featured Image Section -->
+        <div class="post-form-section">
+            <h3 class="post-form-section__title">
+                <i class="fas fa-image"></i>Featured Image
+            </h3>
+
+            <input type="hidden" asp-for="ImageUrl" />
+            <input type="hidden" asp-for="RemoveImage" />
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="current-image-preview">
+                    <p class="current-image-preview__label">Current Image</p>
+                    <img src="@Model.ImageUrl" alt="Current featured image" class="current-image-preview__img" />
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="removeImageBtn" onclick="confirmRemoveImage()">
+                        <i class="fas fa-trash"></i>Remove Image
+                    </button>
+                </div>
+            }
+
+            <div class="form-group">
+                <label asp-for="ImageFile">Upload Image</label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                <small>JPG, PNG, GIF, WebP • Max 5MB</small>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="post-form-section">
+            <h3 class="post-form-section__title">
+                <i class="fas fa-pen-fancy"></i>Content
+            </h3>
+
+            <div class="form-group">
+                <label asp-for="Content">
+                    Post Content
+                    <small style="font-weight: 400; color: var(--text-muted);">• Markdown supported</small>
+                </label>
+                <span asp-validation-for="Content" class="text-danger"></span>
+                <textarea asp-for="Content" placeholder="Write your post content here...&#10;&#10;Tip: Drag and drop images to insert them!" style="margin-top: 1rem;"></textarea>
+            </div>
+        </div>
+
+        <!-- Categorization Section -->
+        <div class="post-form-section">
+            <h3 class="post-form-section__title">
+                <i class="fas fa-folder-open"></i>Categories
+            </h3>
+
+            @if (((IEnumerable<Category>)ViewBag.Categories).Any())
+            {
+                <div class="checkbox-group">
+                    @foreach (var c in (IEnumerable<Category>)ViewBag.Categories)
+                    {
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="CategoryIds" value="@c.Id" 
+                                   @(Model.CategoryIds.Contains(c.Id) ? "checked" : "") 
+                                   class="form-check-input" id="cat_@c.Id" />
+                            <label for="cat_@c.Id" class="form-check-label">@c.Name</label>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No categories yet. <a asp-area="Admin" asp-controller="Categories" asp-action="Index">Create one</a>.</p>
+            }
+        </div>
+
+        <!-- Tags Section -->
+        <div class="post-form-section">
+            <h3 class="post-form-section__title">
+                <i class="fas fa-tag"></i>Tags
+            </h3>
+
+            @if (((IEnumerable<Tag>)ViewBag.Tags).Any())
+            {
+                <div class="checkbox-group">
+                    @foreach (var t in (IEnumerable<Tag>)ViewBag.Tags)
+                    {
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="TagIds" value="@t.Id" 
+                                   @(Model.TagIds.Contains(t.Id) ? "checked" : "") 
+                                   class="form-check-input" id="tag_@t.Id" />
+                            <label for="tag_@t.Id" class="form-check-label">@t.Name</label>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No tags yet. <a asp-area="Admin" asp-controller="Tags" asp-action="Index">Create one</a>.</p>
+            }
+        </div>
+
+        <!-- Publishing Section -->
+        <div class="post-form-section">
+            <h3 class="post-form-section__title">
+                <i class="fas fa-rocket"></i>Publishing
+            </h3>
+
+            <div class="form-check">
+                <input asp-for="IsPublished" class="form-check-input" id="isPublished" />
+                <label asp-for="IsPublished" class="form-check-label">Publish immediately</label>
+            </div>
+
+            <div id="scheduleSection" style="display: none;">
+                <div class="schedule-card">
+                    <h4 class="schedule-card__title">
+                        <i class="fas fa-clock"></i>Schedule Publication
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="ScheduledPublishDate">Date</label>
+                            <input asp-for="ScheduledPublishDate" type="date" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ScheduledPublishTime">Time (local)</label>
+                            <input asp-for="ScheduledPublishTime" type="time" class="form-control" />
+                        </div>
+                    </div>
+                    <small class="text-muted">Post will be automatically published at the specified date and time</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" style="opacity: 1 !important; visibility: visible !important; display: inline-flex !important; pointer-events: auto !important;">
+                <i class="fas fa-save"></i>
+                <span>Save Changes</span>
+            </button>
+            <a asp-action="Index" class="btn btn-secondary" style="opacity: 1 !important; visibility: visible !important; display: inline-flex !important; pointer-events: auto !important; text-decoration: none !important;">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Posts</span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function confirmRemoveImage() {
+        if (confirm('Are you sure you want to remove the current image?')) {
+            document.getElementById('RemoveImage').value = 'true';
+            document.getElementById('ImageUrl').value = '';
+            const preview = document.querySelector('.current-image-preview');
+            if (preview) preview.remove();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const publishCheckbox = document.getElementById('isPublished');
+        const scheduleSection = document.getElementById('scheduleSection');
+
+        function toggleScheduleSection() {
+            scheduleSection.style.display = publishCheckbox.checked ? 'none' : 'block';
+        }
+
+        publishCheckbox.addEventListener('change', toggleScheduleSection);
+        toggleScheduleSection();
+    });
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/editor.js"></script>
+    <script>
+        (function() {
+            const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+            const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+            const form = document.querySelector('form');
+            const fileInput = document.querySelector('input[name="ImageFile"]');
+            const validationSpan = document.querySelector('[data-valmsg-for="ImageFile"]');
+
+            function setError(msg) {
+                if (validationSpan) {
+                    validationSpan.textContent = msg;
+                    validationSpan.classList.add('field-validation-error');
+                }
+            }
+
+            function clearError() {
+                if (validationSpan) {
+                    validationSpan.textContent = '';
+                    validationSpan.classList.remove('field-validation-error');
+                }
+            }
+
+            function validateFile() {
+                clearError();
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) return true;
+                const file = fileInput.files[0];
+                const name = file.name || '';
+                const ext = name.substring(name.lastIndexOf('.')).toLowerCase();
+
+                if (!allowedExtensions.includes(ext)) {
+                    setError('Unsupported image format. Allowed: JPG, JPEG, PNG, GIF, WEBP.');
+                    return false;
+                }
+
+                if (file.size > maxSizeBytes) {
+                    setError('Image is too large. Maximum size is 5MB.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', validateFile);
+            }
+
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!validateFile()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            }
+        })();
+        
+        // CRITICAL FIX: Force button visibility
+        (function() {
+            const formActions = document.querySelector('.form-actions');
+            const buttons = document.querySelectorAll('.form-actions button, .form-actions a.btn');
+            
+            if (formActions) {
+                formActions.style.opacity = '1';
+                formActions.style.visibility = 'visible';
+                formActions.style.display = 'flex';
+                formActions.style.pointerEvents = 'auto';
+            }
+            
+            buttons.forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.visibility = 'visible';
+                btn.style.display = 'inline-flex';
+                btn.style.pointerEvents = 'auto';
+                btn.style.cursor = 'pointer';
+            });
+        })();
+    </script>
+}

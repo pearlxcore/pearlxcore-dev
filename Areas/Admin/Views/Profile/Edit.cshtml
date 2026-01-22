@@ -1,0 +1,68 @@
+@model pearlxcore.dev.ViewModels.Admin.Profile.AdminProfileFormViewModel
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="admin-page">
+    <div class="page-header mb-4 d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-title mb-1">Edit Profile</h1>
+            <p class="text-muted mb-0">Update your About Me details</p>
+        </div>
+        <a asp-action="About" class="btn btn-outline-secondary">Back</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Title</label>
+                    <input asp-for="Title" class="form-control" placeholder="e.g., Software Engineer" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AvatarFile" class="form-label">Avatar Image</label>
+                    <input asp-for="AvatarFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                    <small class="text-muted">Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB</small>
+                    <span asp-validation-for="AvatarFile" class="text-danger d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Bio" class="form-label">Bio</label>
+                    <textarea asp-for="Bio" class="form-control" rows="6" placeholder="Write a short bio..."></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CvFile" class="form-label">Resume/CV</label>
+                    <input asp-for="CvFile" type="file" class="form-control" accept=".pdf,.doc,.docx" />
+                    <small class="text-muted">Supported formats: PDF, DOC, DOCX. Max size: 10MB</small>
+                    <span asp-validation-for="CvFile" class="text-danger d-block"></span>
+                    @if (!string.IsNullOrEmpty(Model.CvUrl))
+                    {
+                        <div class="mt-2">
+                            <span class="badge bg-success">Current CV:</span>
+                            <a href="@Model.CvUrl" target="_blank" class="ms-2">Download</a>
+                        </div>
+                    }
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

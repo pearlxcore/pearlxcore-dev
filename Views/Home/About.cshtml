@@ -1,0 +1,96 @@
+@model pearlxcore.dev.Models.Entities.AdminProfile
+@{
+    ViewData["Title"] = "About";
+}
+
+<!-- About Hero Section -->
+<section class="about-hero">
+    <div class="about-hero__container">
+        <div class="about-hero__avatar">
+            @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
+            {
+                <img src="@Model.AvatarUrl" alt="@Model.Name" class="about-hero__image" />
+            }
+            else
+            {
+                <div class="about-hero__placeholder">
+                    @if (!string.IsNullOrEmpty(Model.Name))
+                    {
+                        <span>@Model.Name.Substring(0, 1).ToUpper()</span>
+                    }
+                </div>
+            }
+        </div>
+        <div class="about-hero__content">
+            <h1 class="about-hero__title">@Model.Name</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Title))
+            {
+                <p class="about-hero__subtitle">@Model.Title</p>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- About Content Section -->
+<section class="about-content">
+    <div class="about-content__container">
+        @if (!string.IsNullOrWhiteSpace(Model.Bio))
+        {
+            <div class="about-bio">
+                @Html.Raw(Model.Bio.Replace("\n", "<br />"))
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">This author hasn't written a bio yet.</p>
+        }
+        
+        <div class="about-meta">
+            <p class="about-meta__item">
+                <span class="about-meta__label">Profile updated</span>
+                <span class="about-meta__value">@Model.UpdatedAt.ToLocalTime().ToString("MMMM dd, yyyy")</span>
+            </p>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="about-contact">
+            <h2 class="about-contact__title">Get In Touch</h2>
+            <div class="about-contact__grid">
+                <!-- Email -->
+                <div class="about-contact__card">
+                    <h3 class="about-contact__label">📧 Email</h3>
+                    <a href="mailto:moehammadizzat@gmail.com" class="about-contact__value">
+                        moehammadizzat@gmail.com
+                    </a>
+                </div>
+
+                <!-- Phone -->
+                <div class="about-contact__card">
+                    <h3 class="about-contact__label">📱 Phone</h3>
+                    <a href="tel:0176612934" class="about-contact__value">
+                        0176612934
+                    </a>
+                </div>
+
+                <!-- GitHub -->
+                <div class="about-contact__card">
+                    <h3 class="about-contact__label">💻 GitHub</h3>
+                    <a href="https://github.com/pearlxcore" target="_blank" rel="noopener noreferrer" class="about-contact__value">
+                        pearlxcore
+                    </a>
+                </div>
+
+                <!-- CV/Resume -->
+                @if (!string.IsNullOrEmpty(Model.CvUrl))
+                {
+                    <div class="about-contact__card">
+                        <h3 class="about-contact__label">📄 Resume/CV</h3>
+                        <a href="@Model.CvUrl" target="_blank" rel="noopener noreferrer" class="about-contact__value">
+                            Download CV
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

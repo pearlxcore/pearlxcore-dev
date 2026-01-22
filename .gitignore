@@ -1,0 +1,49 @@
+# Logs
+logs/
+*.log
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+*.vsidx
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+
+# User uploads
+wwwroot/images/posts/*
+wwwroot/images/avatars/*
+!wwwroot/images/posts/.gitkeep
+!wwwroot/images/avatars/.gitkeep
+
+# Environment variables
+.env
+.env.local

@@ -1,0 +1,115 @@
+@model List<pearlxcore.dev.Services.Interfaces.MediaFileInfo>
+@{
+    ViewData["Title"] = "Media Gallery";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="admin-page">
+    <div class="page-header mb-5">
+        <h1 class="page-title">Media Gallery</h1>
+        <p class="page-subtitle text-muted">Manage uploaded images</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success!</strong> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p class="text-muted mb-0" style="font-size: 0.9rem;">Total Images: <strong>@Model.Count</strong></p>
+                            <p class="text-muted mb-0" style="font-size: 0.9rem;">Total Size: <strong>@FormatTotalSize(Model)</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var image in Model)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100" style="border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden;">
+                        <div style="position: relative; height: 200px; background: #f8f9fa; overflow: hidden;">
+                            <img src="@image.FilePath" alt="@image.FileName" style="width: 100%; height: 100%; object-fit: cover;" />
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s;" class="image-overlay">
+                                <div style="display: flex; justify-content: center; align-items: center; height: 100%; gap: 0.5rem;">
+                                    <a href="@image.FilePath" target="_blank" class="btn btn-sm btn-light" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <form method="post" action="@Url.Action("Delete")" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="fileName" value="@image.FileName" />
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding: 1rem;">
+                            <p class="mb-2" style="font-size: 0.85rem; font-weight: 500; word-break: break-all;">@image.FileName</p>
+                            <p class="text-muted mb-1" style="font-size: 0.75rem;">@image.FormattedSize</p>
+                            <p class="text-muted mb-0" style="font-size: 0.75rem;">@image.CreatedDate.ToString("MMM dd, yyyy HH:mm")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const imageOverlays = document.querySelectorAll('.image-overlay');
+                imageOverlays.forEach(overlay => {
+                    const card = overlay.closest('.card');
+                    card.addEventListener('mouseenter', function() {
+                        overlay.style.opacity = '1';
+                    });
+                    card.addEventListener('mouseleave', function() {
+                        overlay.style.opacity = '0';
+                    });
+                });
+            });
+        </script>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            <strong>No images found.</strong> Images will appear here once you upload them to your posts.
+        </div>
+    }
+</div>
+
+@functions {
+    private string FormatTotalSize(List<pearlxcore.dev.Services.Interfaces.MediaFileInfo> images)
+    {
+        long totalBytes = images.Sum(i => i.FileSize);
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = totalBytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}
