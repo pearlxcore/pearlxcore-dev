@@ -114,6 +114,7 @@ namespace pearlxcore.dev
                 app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
             }
 
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthentication();
