@@ -120,7 +120,6 @@ namespace pearlxcore.dev
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapStaticAssets();
 
             // Area routing
             app.MapControllerRoute(
@@ -131,8 +130,7 @@ namespace pearlxcore.dev
             // Default routing
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
             await DbInitializer.SeedAsync(app.Services);
 
