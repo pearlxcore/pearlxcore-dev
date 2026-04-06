@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - pearlxcore.dev</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -93,6 +93,9 @@
                 return;
             }
 
+            const inputId = input.id || input.getAttribute('name') || 'file';
+            input.setAttribute('data-file-upload-source', inputId);
+
             const updateText = () => {
                 if (input.files && input.files.length > 0) {
                     text.value = input.files.length === 1
@@ -105,6 +108,12 @@
 
             button.addEventListener('click', () => input.click());
             input.addEventListener('change', updateText);
+            input.addEventListener('input', updateText);
+            wrapper.addEventListener('click', (event) => {
+                if (event.target === text) {
+                    input.click();
+                }
+            });
             updateText();
         });
     </script>

@@ -94,13 +94,21 @@ public class AdminProfileService : IAdminProfileService
         var fileName = $"{Guid.NewGuid()}{ext}";
         var filePath = Path.Combine(uploadsDir, fileName);
 
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        try
         {
-            await avatarFile.CopyToAsync(stream);
-        }
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await avatarFile.CopyToAsync(stream);
+            }
 
-        Log.Information("Avatar uploaded successfully: {FileName} ({Size} bytes)", fileName, avatarFile.Length);
-        return $"/images/avatars/{fileName}";
+            Log.Information("Avatar uploaded successfully: {FileName} ({Size} bytes)", fileName, avatarFile.Length);
+            return $"/images/avatars/{fileName}";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Avatar upload failed for {FileName}", fileName);
+            return null;
+        }
     }
 
     public async Task<string?> SaveCvAsync(IFormFile? cvFile)
@@ -133,12 +141,20 @@ public class AdminProfileService : IAdminProfileService
         var fileName = $"resume_{Guid.NewGuid()}{ext}";
         var filePath = Path.Combine(uploadsDir, fileName);
 
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        try
         {
-            await cvFile.CopyToAsync(stream);
-        }
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await cvFile.CopyToAsync(stream);
+            }
 
-        Log.Information("CV uploaded successfully: {FileName} ({Size} bytes)", fileName, cvFile.Length);
-        return $"/files/cv/{fileName}";
+            Log.Information("CV uploaded successfully: {FileName} ({Size} bytes)", fileName, cvFile.Length);
+            return $"/files/cv/{fileName}";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "CV upload failed for {FileName}", fileName);
+            return null;
+        }
     }
 }

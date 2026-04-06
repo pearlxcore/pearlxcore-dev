@@ -58,7 +58,7 @@ Write-Host ("Previous live target: " + ($(if ($PreviousLiveTarget) { $PreviousLi
 
 # Step 3: Prepare remote directories
 Write-Host "`n[3/6] Preparing remote release directories..." -ForegroundColor Yellow
-ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && chmod -R a+rwX '$RemoteUploadsRoot'"
+ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && chmod -R a+rwX '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Remote directory preparation failed!" -ForegroundColor Red
@@ -84,7 +84,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Upload completed successfully" -ForegroundColor Green
 
-ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir'"
+ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to set release permissions!" -ForegroundColor Red
@@ -110,7 +110,7 @@ ln -sfnT '$RemotePostsDir' '$RemoteReleaseDir/wwwroot/images/posts'
 ln -sfnT '$RemoteAvatarsDir' '$RemoteReleaseDir/wwwroot/images/avatars'
 ln -sfnT '$RemoteCvDir' '$RemoteReleaseDir/wwwroot/files/cv'
 ln -sfnT '$RemoteReleaseDir' '$RemoteLiveLink'
-chmod -R a+rX '$RemoteReleaseDir'
+chmod -R a+rX '$RemoteReleaseDir' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'
 "@
 
 if ($LASTEXITCODE -ne 0) {
