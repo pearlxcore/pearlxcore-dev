@@ -17,6 +17,7 @@ $RemoteReleaseDir = "$RemoteReleasesRoot/$ReleaseName"
 $RemoteLiveLink = "$RemoteRoot/publish"
 $RemoteLegacyDir = "$RemoteReleasesRoot/legacy-$ReleaseName"
 $RemotePostsDir = "$RemoteUploadsRoot/posts"
+$RemoteProjectsDir = "$RemoteUploadsRoot/projects"
 $RemoteAvatarsDir = "$RemoteUploadsRoot/avatars"
 $RemoteCvDir = "$RemoteUploadsRoot/cv"
 
@@ -59,10 +60,10 @@ Write-Host ("Previous live target: " + ($(if ($PreviousLiveTarget) { $PreviousLi
 # Step 3: Prepare remote directories
 Write-Host "`n[3/6] Preparing remote release directories..." -ForegroundColor Yellow
 if ([string]::IsNullOrWhiteSpace($SudoPassword)) {
-    ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && chmod -R a+rwX '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+    ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && chmod -R a+rwX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 }
 else {
-    ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rwX '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+    ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rwX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 }
 
 if ($LASTEXITCODE -ne 0) {
@@ -71,7 +72,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # If this server still has an old physical publish directory, migrate its persistent uploads once.
-ssh "$User@$Server" "if [ -d '$RemoteLiveLink' ] && [ ! -L '$RemoteLiveLink' ]; then cp -a '$RemoteLiveLink/wwwroot/images/posts/.' '$RemotePostsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/images/avatars/.' '$RemoteAvatarsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/files/cv/.' '$RemoteCvDir/' 2>/dev/null || true; mv '$RemoteLiveLink' '$RemoteLegacyDir'; fi"
+ssh "$User@$Server" "if [ -d '$RemoteLiveLink' ] && [ ! -L '$RemoteLiveLink' ]; then cp -a '$RemoteLiveLink/wwwroot/images/posts/.' '$RemotePostsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/images/projects/.' '$RemoteProjectsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/images/avatars/.' '$RemoteAvatarsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/files/cv/.' '$RemoteCvDir/' 2>/dev/null || true; mv '$RemoteLiveLink' '$RemoteLegacyDir'; fi"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to migrate existing live directory!" -ForegroundColor Red
@@ -90,10 +91,10 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Upload completed successfully" -ForegroundColor Green
 
 if ([string]::IsNullOrWhiteSpace($SudoPassword)) {
-    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 }
 else {
-    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' && printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rX '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' && printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 }
 
 if ($LASTEXITCODE -ne 0) {
@@ -109,19 +110,23 @@ mkdir -p '$RemoteReleaseDir/wwwroot/images' '$RemoteReleaseDir/wwwroot/files'
 if [ -d '$RemoteReleaseDir/wwwroot/images/posts' ]; then
     cp -a '$RemoteReleaseDir/wwwroot/images/posts/.' '$RemotePostsDir/' 2>/dev/null || true
 fi
+if [ -d '$RemoteReleaseDir/wwwroot/images/projects' ]; then
+    cp -a '$RemoteReleaseDir/wwwroot/images/projects/.' '$RemoteProjectsDir/' 2>/dev/null || true
+fi
 if [ -d '$RemoteReleaseDir/wwwroot/images/avatars' ]; then
     cp -a '$RemoteReleaseDir/wwwroot/images/avatars/.' '$RemoteAvatarsDir/' 2>/dev/null || true
 fi
 if [ -d '$RemoteReleaseDir/wwwroot/files/cv' ]; then
     cp -a '$RemoteReleaseDir/wwwroot/files/cv/.' '$RemoteCvDir/' 2>/dev/null || true
 fi
-rm -rf '$RemoteReleaseDir/wwwroot/images/posts' '$RemoteReleaseDir/wwwroot/images/avatars' '$RemoteReleaseDir/wwwroot/files/cv'
+rm -rf '$RemoteReleaseDir/wwwroot/images/posts' '$RemoteReleaseDir/wwwroot/images/projects' '$RemoteReleaseDir/wwwroot/images/avatars' '$RemoteReleaseDir/wwwroot/files/cv'
 ln -sfnT '$RemotePostsDir' '$RemoteReleaseDir/wwwroot/images/posts'
+ln -sfnT '$RemoteProjectsDir' '$RemoteReleaseDir/wwwroot/images/projects'
 ln -sfnT '$RemoteAvatarsDir' '$RemoteReleaseDir/wwwroot/images/avatars'
 ln -sfnT '$RemoteCvDir' '$RemoteReleaseDir/wwwroot/files/cv'
 ln -sfnT '$RemoteReleaseDir' '$RemoteLiveLink'
 chmod -R a+rX '$RemoteReleaseDir'
-printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rX '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'
+printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'
 "@
 
 if ($LASTEXITCODE -ne 0) {

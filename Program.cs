@@ -122,9 +122,12 @@ namespace pearlxcore.dev
                 // so the running service can write them without touching the deployment root.
                 var sharedUploadsRoot = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "..", "shared", "uploads"));
                 var postImagesPath = Path.Combine(sharedUploadsRoot, "posts");
+                var projectImagesPath = Path.Combine(sharedUploadsRoot, "projects");
                 Directory.CreateDirectory(postImagesPath);
+                Directory.CreateDirectory(projectImagesPath);
 
                 var legacyPostImagesPath = Path.Combine(app.Environment.WebRootPath, "images", "posts");
+                var legacyProjectImagesPath = Path.Combine(app.Environment.WebRootPath, "images", "projects");
 
                 var postImageProviders = new List<IFileProvider>
                 {
@@ -140,6 +143,22 @@ namespace pearlxcore.dev
                 {
                     FileProvider = new CompositeFileProvider(postImageProviders),
                     RequestPath = "/images/posts"
+                });
+
+                var projectImageProviders = new List<IFileProvider>
+                {
+                    new PhysicalFileProvider(projectImagesPath)
+                };
+
+                if (Directory.Exists(legacyProjectImagesPath))
+                {
+                    projectImageProviders.Add(new PhysicalFileProvider(legacyProjectImagesPath));
+                }
+
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new CompositeFileProvider(projectImageProviders),
+                    RequestPath = "/images/projects"
                 });
 
                 app.UseStaticFiles();

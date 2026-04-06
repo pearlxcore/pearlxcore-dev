@@ -13,10 +13,13 @@ public class ProjectsController : AdminController
     private static readonly string[] ProjectTypes =
     [
         "Desktop App",
-        "PS4 / PS5 Community",
+        "PS2",
+        "PS3",
+        "PS4",
+        "PS5",
         "Mobile / Cellular",
         "Automation",
-        "Other"
+        "Misc"
     ];
 
     private static readonly string[] ProjectStatuses =
@@ -29,6 +32,9 @@ public class ProjectsController : AdminController
 
     private readonly IProjectService _projectService;
     private readonly IAuditLogService _auditLogService;
+
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+    private const int MaxImageSizeBytes = 5 * 1024 * 1024;
 
     public ProjectsController(IProjectService projectService, IAuditLogService auditLogService)
     {
@@ -57,11 +63,20 @@ public class ProjectsController : AdminController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProjectFormViewModel model)
     {
+        var screenshotValidationError = ValidateImageFile(model.ScreenshotFile);
+        if (screenshotValidationError != null)
+        {
+            ModelState.AddModelError(nameof(model.ScreenshotFile), screenshotValidationError);
+        }
+
         if (!ModelState.IsValid)
         {
             PopulateOptions();
             return View(model);
         }
+
+        var screenshotUrl = await _projectService.SaveProjectScreenshotAsync(model.ScreenshotFile);
+        var finalScreenshotUrl = screenshotUrl ?? model.ScreenshotUrl;
 
         var project = new Project
         {
@@ -72,7 +87,7 @@ public class ProjectsController : AdminController
             Description = model.Description,
             GitHubUrl = model.GitHubUrl,
             DownloadUrl = model.DownloadUrl,
-            ScreenshotUrl = model.ScreenshotUrl,
+            ScreenshotUrl = finalScreenshotUrl,
             SortOrder = model.SortOrder
         };
 
@@ -114,6 +129,12 @@ public class ProjectsController : AdminController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(ProjectFormViewModel model)
     {
+        var screenshotValidationError = ValidateImageFile(model.ScreenshotFile);
+        if (screenshotValidationError != null)
+        {
+            ModelState.AddModelError(nameof(model.ScreenshotFile), screenshotValidationError);
+        }
+
         if (!ModelState.IsValid)
         {
             PopulateOptions();
@@ -131,6 +152,8 @@ public class ProjectsController : AdminController
             return NotFound();
         }
 
+        var screenshotUrl = await _projectService.SaveProjectScreenshotAsync(model.ScreenshotFile);
+
         var project = new Project
         {
             Id = existing.Id,
@@ -141,7 +164,7 @@ public class ProjectsController : AdminController
             Description = model.Description,
             GitHubUrl = model.GitHubUrl,
             DownloadUrl = model.DownloadUrl,
-            ScreenshotUrl = model.ScreenshotUrl,
+            ScreenshotUrl = screenshotUrl ?? model.ScreenshotUrl,
             SortOrder = model.SortOrder,
             CreatedAt = existing.CreatedAt
         };
@@ -178,5 +201,26 @@ public class ProjectsController : AdminController
     {
         ViewBag.ProjectTypeOptions = ProjectTypes.Select(x => new SelectListItem(x, x)).ToList();
         ViewBag.ProjectStatusOptions = ProjectStatuses.Select(x => new SelectListItem(x, x)).ToList();
+    }
+
+    private static string? ValidateImageFile(IFormFile? imageFile)
+    {
+        if (imageFile == null || imageFile.Length == 0)
+        {
+            return null;
+        }
+
+        if (imageFile.Length > MaxImageSizeBytes)
+        {
+            return "Screenshot is too large. Maximum size is 5 MB.";
+        }
+
+        var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        if (!AllowedImageExtensions.Contains(extension))
+        {
+            return "Unsupported image format. Allowed: JPG, JPEG, PNG, GIF, WEBP.";
+        }
+
+        return null;
     }
 }

@@ -17,6 +17,7 @@
             <form method="post">
                 @Html.AntiForgeryToken()
                 <input asp-for="Id" type="hidden" />
+                <input asp-for="ScreenshotUrl" type="hidden" />
 
                 <div class="row g-3">
                     <div class="col-md-8">
@@ -60,9 +61,19 @@
                         <span asp-validation-for="DownloadUrl" class="text-danger"></span>
                     </div>
                     <div class="col-12">
-                        <label asp-for="ScreenshotUrl" class="form-label admin-form-label">Screenshot URL</label>
-                        <input asp-for="ScreenshotUrl" class="form-control" />
-                        <span asp-validation-for="ScreenshotUrl" class="text-danger"></span>
+                        <label asp-for="ScreenshotFile" class="form-label admin-form-label">Screenshot Image</label>
+                        @if (!string.IsNullOrWhiteSpace(Model.ScreenshotUrl))
+                        {
+                            <div class="project-form__preview mb-3">
+                                <img src="@Model.ScreenshotUrl" alt="@Model.Title screenshot" class="project-form__preview-image" />
+                            </div>
+                        }
+                        <div class="file-upload" data-file-upload>
+                            <input asp-for="ScreenshotFile" type="file" class="file-upload__input" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                            <button type="button" class="file-upload__button">Choose File</button>
+                            <input type="text" class="file-upload__text" value="No file chosen" readonly />
+                        </div>
+                        <span asp-validation-for="ScreenshotFile" class="text-danger"></span>
                     </div>
                 </div>
 

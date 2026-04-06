@@ -36,5 +36,7 @@ public class ProjectFormViewModel
     [StringLength(300)]
     public string? ScreenshotUrl { get; set; }
 
+    public IFormFile? ScreenshotFile { get; set; }
+
     public int SortOrder { get; set; }
 }
