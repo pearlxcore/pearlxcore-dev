@@ -155,13 +155,13 @@ namespace pearlxcore.dev
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-                try
+                if (app.Environment.IsDevelopment())
                 {
                     await DbInitializer.SeedAsync(app.Services);
                 }
-                catch (Exception ex)
+                else
                 {
-                    Log.Error(ex, "Database initialization failed during startup. Continuing without seeding so the application can stay online.");
+                    Log.Information("Skipping startup database initialization in Production.");
                 }
 
                 app.Run();
