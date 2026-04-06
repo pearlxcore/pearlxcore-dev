@@ -155,7 +155,14 @@ namespace pearlxcore.dev
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-                await DbInitializer.SeedAsync(app.Services);
+                try
+                {
+                    await DbInitializer.SeedAsync(app.Services);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Database initialization failed during startup. Continuing without seeding so the application can stay online.");
+                }
 
                 app.Run();
             }
