@@ -1,0 +1,82 @@
+@model IEnumerable<pearlxcore.dev.Models.Entities.Project>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Projects";
+    var projects = Model.OrderBy(p => p.SortOrder).ThenBy(p => p.Title).ToList();
+}
+
+<div class="admin-page">
+    <div class="page-header mb-5">
+        <h1 class="page-title">Projects</h1>
+        <p class="page-subtitle">Manage your archived and active open source projects</p>
+    </div>
+
+    <div class="d-flex justify-content-end mb-4">
+        <a asp-action="Create" class="btn btn-primary admin-surface-card__button">
+            <i class="fas fa-plus"></i>Add Project
+        </a>
+    </div>
+
+    @if (!projects.Any())
+    {
+        <div class="alert alert-info admin-surface-alert" role="alert">
+            No projects yet. Add your first project above!
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var project in projects)
+            {
+                <div class="col-lg-6 mb-4">
+                    <div class="card admin-surface-card h-100 project-admin-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <div class="project-admin-card__badges mb-2">
+                                        <span class="badge project-admin-card__badge">@project.ProjectType</span>
+                                        <span class="badge project-admin-card__badge project-admin-card__badge--status">@project.Status</span>
+                                    </div>
+                                    <h5 class="card-title admin-surface-card__title mb-1">@project.Title</h5>
+                                    <p class="card-text admin-surface-card__meta small mb-2">Sort order: @project.SortOrder</p>
+                                </div>
+                                <div class="d-flex flex-column gap-2 align-items-end">
+                                    <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-sm btn-back-cancel">Edit</a>
+                                    <form method="post" asp-action="Delete" asp-route-id="@project.Id" onsubmit="return confirm('Delete this project?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-back-cancel admin-surface-card__delete">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(project.Summary))
+                            {
+                                <p class="admin-surface-card__text mb-3">@project.Summary</p>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(project.Description))
+                            {
+                                <p class="admin-surface-card__meta small mb-3">@project.Description</p>
+                            }
+
+                            <div class="project-admin-card__links">
+                                @if (!string.IsNullOrWhiteSpace(project.GitHubUrl))
+                                {
+                                    <a href="@project.GitHubUrl" target="_blank" rel="noopener noreferrer">GitHub</a>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(project.DownloadUrl))
+                                {
+                                    <a href="@project.DownloadUrl" target="_blank" rel="noopener noreferrer">Download</a>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
+                                {
+                                    <a href="@project.ScreenshotUrl" target="_blank" rel="noopener noreferrer">Screenshot</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

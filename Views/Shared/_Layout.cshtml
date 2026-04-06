@@ -26,6 +26,7 @@
             <nav class="header-nav" id="nav">
                 <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
                 <a asp-controller="Blog" asp-action="Index" class="nav-link">Blog</a>
+                <a asp-controller="Projects" asp-action="Index" class="nav-link">Projects</a>
                 <a asp-controller="Home" asp-action="About" class="nav-link">About</a>
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {

@@ -97,6 +97,7 @@ namespace pearlxcore.dev
                 builder.Services.AddScoped<IPostService, PostService>();
                 builder.Services.AddScoped<ICategoryService, CategoryService>();
                 builder.Services.AddScoped<ITagService, TagService>();
+                builder.Services.AddScoped<IProjectService, ProjectService>();
                 builder.Services.AddScoped<IAdminProfileService, AdminProfileService>();
                 builder.Services.AddScoped<IMediaService, MediaService>();
                 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
@@ -155,13 +156,15 @@ namespace pearlxcore.dev
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+                await DbInitializer.MigrateAsync(app.Services);
+
                 if (app.Environment.IsDevelopment())
                 {
                     await DbInitializer.SeedAsync(app.Services);
                 }
                 else
                 {
-                    Log.Information("Skipping startup database initialization in Production.");
+                    Log.Information("Skipping startup database seeding in Production.");
                 }
 
                 app.Run();

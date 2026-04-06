@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<PostTag> PostTags => Set<PostTag>();
     public DbSet<AdminProfile> AdminProfiles => Set<AdminProfile>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Project> Projects => Set<Project>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -29,6 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         ConfigurePostCategory(builder);
         ConfigurePostTag(builder);
             ConfigureAdminProfile(builder);
+        ConfigureProject(builder);
     }
 
     private static void ConfigurePost(ModelBuilder builder)
@@ -158,6 +160,49 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
             entity.Property(p => p.UpdatedAt)
                   .IsRequired();
+        });
+    }
+
+    private static void ConfigureProject(ModelBuilder builder)
+    {
+        builder.Entity<Project>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+
+            entity.Property(p => p.Title)
+                  .HasMaxLength(200)
+                  .IsRequired();
+
+            entity.Property(p => p.ProjectType)
+                  .HasMaxLength(100)
+                  .IsRequired();
+
+            entity.Property(p => p.Status)
+                  .HasMaxLength(40)
+                  .IsRequired();
+
+            entity.Property(p => p.Summary)
+                  .HasMaxLength(500);
+
+            entity.Property(p => p.Description)
+                  .HasColumnType("nvarchar(max)");
+
+            entity.Property(p => p.GitHubUrl)
+                  .HasMaxLength(300);
+
+            entity.Property(p => p.DownloadUrl)
+                  .HasMaxLength(300);
+
+            entity.Property(p => p.ScreenshotUrl)
+                  .HasMaxLength(300);
+
+            entity.Property(p => p.CreatedAt)
+                  .IsRequired();
+
+            entity.Property(p => p.UpdatedAt)
+                  .IsRequired();
+
+            entity.HasIndex(p => p.SortOrder);
         });
     }
 

@@ -1,0 +1,80 @@
+@model pearlxcore.dev.ViewModels.Admin.Projects.ProjectFormViewModel
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit Project";
+}
+
+<div class="admin-page">
+    <div class="page-header page-header--centered mb-4">
+        <div>
+            <h1 class="page-title mb-1">Edit Project</h1>
+            <p class="page-subtitle mb-0">Update this project entry</p>
+        </div>
+    </div>
+
+    <div class="card admin-surface-card">
+        <div class="card-body">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id" type="hidden" />
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label asp-for="Title" class="form-label admin-form-label">Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="Project title" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="SortOrder" class="form-label admin-form-label">Sort Order</label>
+                        <input asp-for="SortOrder" type="number" class="form-control" />
+                        <span asp-validation-for="SortOrder" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ProjectType" class="form-label admin-form-label">Project Type</label>
+                        <select asp-for="ProjectType" asp-items="ViewBag.ProjectTypeOptions" class="form-select"></select>
+                        <span asp-validation-for="ProjectType" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label admin-form-label">Status</label>
+                        <select asp-for="Status" asp-items="ViewBag.ProjectStatusOptions" class="form-select"></select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Summary" class="form-label admin-form-label">Summary</label>
+                        <textarea asp-for="Summary" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Summary" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label admin-form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="GitHubUrl" class="form-label admin-form-label">GitHub Repo URL</label>
+                        <input asp-for="GitHubUrl" class="form-control" />
+                        <span asp-validation-for="GitHubUrl" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DownloadUrl" class="form-label admin-form-label">Download / Release URL</label>
+                        <input asp-for="DownloadUrl" class="form-control" />
+                        <span asp-validation-for="DownloadUrl" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="ScreenshotUrl" class="form-label admin-form-label">Screenshot URL</label>
+                        <input asp-for="ScreenshotUrl" class="form-control" />
+                        <span asp-validation-for="ScreenshotUrl" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="admin-form-actions mt-4">
+                    <a asp-action="Index" class="btn btn-back-cancel">Back</a>
+                    <button type="submit" class="btn btn-primary admin-surface-card__button">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

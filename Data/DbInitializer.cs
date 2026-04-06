@@ -10,6 +10,17 @@ namespace pearlxcore.dev.Data;
 
 public static class DbInitializer
 {
+    public static async Task MigrateAsync(IServiceProvider services)
+    {
+        using var scope = services.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        Log.Information("Starting database migration");
+        await context.Database.MigrateAsync();
+        Log.Information("Database migration completed");
+    }
+
     public static async Task SeedAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
@@ -21,11 +32,6 @@ public static class DbInitializer
 
         Log.Information("Starting database initialization");
 
-        // ?? Ensure database is created / migrated
-        await context.Database.MigrateAsync();
-        Log.Information("Database migration completed");
-
-        // ?? Ensure Admin role exists
         const string adminRoleName = "Admin";
 
         if (!await roleManager.RoleExistsAsync(adminRoleName))

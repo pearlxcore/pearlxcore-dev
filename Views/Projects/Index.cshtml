@@ -1,0 +1,108 @@
+@model IEnumerable<pearlxcore.dev.Models.Entities.Project>
+@{
+    ViewData["Title"] = "Projects";
+    var projects = Model.OrderBy(p => p.SortOrder).ThenBy(p => p.Title).ToList();
+}
+
+<section class="projects-hero">
+    <div class="projects-hero__inner">
+        <p class="projects-hero__eyebrow">Open Source Archive</p>
+        <h1 class="projects-hero__title">Projects</h1>
+        <p class="projects-hero__lead">
+            Archived desktop apps, community tools, mobile utilities, and automation work gathered in one place.
+        </p>
+    </div>
+</section>
+
+<section class="projects-grid">
+    @if (!projects.Any())
+    {
+        <div class="empty-state">
+            <h3>No projects yet</h3>
+            <p>Projects will appear here once they&apos;re added from the admin panel.</p>
+        </div>
+    }
+    else
+    {
+        foreach (var project in projects)
+        {
+            var projectImageLink = !string.IsNullOrWhiteSpace(project.GitHubUrl)
+                ? project.GitHubUrl
+                : !string.IsNullOrWhiteSpace(project.DownloadUrl)
+                    ? project.DownloadUrl
+                    : project.ScreenshotUrl;
+
+            <article class="project-card">
+                @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
+                {
+                    if (!string.IsNullOrWhiteSpace(projectImageLink))
+                    {
+                        <a href="@projectImageLink" class="project-card__image-link" target="_blank" rel="noopener noreferrer">
+                            <img src="@project.ScreenshotUrl" alt="@project.Title" class="project-card__image" />
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="project-card__image-link">
+                            <img src="@project.ScreenshotUrl" alt="@project.Title" class="project-card__image" />
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="project-card__placeholder">
+                        <span>@project.ProjectType</span>
+                    </div>
+                }
+
+                <div class="project-card__body">
+                    <div class="project-card__meta">
+                        <span class="project-card__badge project-card__badge--type">@project.ProjectType</span>
+                        <span class="project-card__badge @GetStatusBadgeClass(project.Status)">@project.Status</span>
+                    </div>
+
+                    <h2 class="project-card__title">@project.Title</h2>
+
+                    @if (!string.IsNullOrWhiteSpace(project.Summary))
+                    {
+                        <p class="project-card__summary">@project.Summary</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(project.Description))
+                    {
+                        <p class="project-card__description">@project.Description</p>
+                    }
+
+                    <div class="project-card__actions">
+                        @if (!string.IsNullOrWhiteSpace(project.GitHubUrl))
+                        {
+                            <a href="@project.GitHubUrl" class="btn btn-back-cancel project-card__action" target="_blank" rel="noopener noreferrer">
+                                GitHub
+                            </a>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(project.DownloadUrl))
+                        {
+                            <a href="@project.DownloadUrl" class="btn btn-primary project-card__action" target="_blank" rel="noopener noreferrer">
+                                Download
+                            </a>
+                        }
+                    </div>
+                </div>
+            </article>
+        }
+    }
+</section>
+
+@functions {
+    private static string GetStatusBadgeClass(string? status)
+    {
+        return status?.ToLowerInvariant() switch
+        {
+            "active" => "project-card__badge--active",
+            "experimental" => "project-card__badge--experimental",
+            "inactive" => "project-card__badge--inactive",
+            _ => "project-card__badge--archived",
+        };
+    }
+}
