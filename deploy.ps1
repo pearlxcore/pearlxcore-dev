@@ -4,14 +4,29 @@
 param(
     [string]$Server = "192.168.50.146",
     [string]$User = "pearlxcore",
-    [string]$RemotePath = "/home/pearlxcore/pearlxcore.dev"
+    [string]$RemoteRoot = "/var/www/pearlxcore.dev",
+    [string]$PublishDir = (Join-Path $PSScriptRoot ".artifacts\publish")
 )
+
+$ReleaseName = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
+$RemoteReleasesRoot = "$RemoteRoot/releases"
+$RemoteSharedRoot = "$RemoteRoot/shared"
+$RemoteReleaseDir = "$RemoteReleasesRoot/$ReleaseName"
+$RemoteLiveLink = "$RemoteRoot/publish"
+$RemoteLegacyDir = "$RemoteReleasesRoot/legacy-$ReleaseName"
+$RemotePostsDir = "$RemoteSharedRoot/wwwroot/images/posts"
+$RemoteAvatarsDir = "$RemoteSharedRoot/wwwroot/images/avatars"
+$RemoteCvDir = "$RemoteSharedRoot/wwwroot/files/cv"
 
 Write-Host "Starting deployment to $Server..." -ForegroundColor Cyan
 
+if (Test-Path -LiteralPath $PublishDir) {
+    Remove-Item -LiteralPath $PublishDir -Recurse -Force
+}
+
 # Step 1: Build Release version
-Write-Host "`n[1/4] Building Release version..." -ForegroundColor Yellow
-dotnet publish -c Release -o ./publish
+Write-Host "`n[1/6] Building Release version into $PublishDir..." -ForegroundColor Yellow
+dotnet publish -c Release -o $PublishDir
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red
@@ -19,14 +34,38 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Build completed successfully" -ForegroundColor Green
 
-# Step 2: Stop remote service
-Write-Host "`n[2/4] Stopping remote service..." -ForegroundColor Yellow
-ssh "$User@$Server" "sudo systemctl stop pearlxcore || true"
-Start-Sleep -Seconds 2
+# Step 2: Inspect existing live target
+Write-Host "`n[2/6] Inspecting existing live release..." -ForegroundColor Yellow
+$PreviousLiveTarget = ssh "$User@$Server" "if [ -L '$RemoteLiveLink' ]; then readlink -f '$RemoteLiveLink'; fi" | Select-Object -First 1
+if ($null -ne $PreviousLiveTarget) {
+    $PreviousLiveTarget = $PreviousLiveTarget.Trim()
+}
+else {
+    $PreviousLiveTarget = ""
+}
+Write-Host ("Previous live target: " + ($(if ($PreviousLiveTarget) { $PreviousLiveTarget } else { "(none - legacy directory)" }))) -ForegroundColor DarkGray
 
-# Step 3: Upload files via SCP
-Write-Host "`n[3/4] Uploading files to server..." -ForegroundColor Yellow
-scp -r ./publish/* "$User@${Server}:$RemotePath"
+# Step 3: Prepare remote directories
+Write-Host "`n[3/6] Preparing remote release directories..." -ForegroundColor Yellow
+ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Remote directory preparation failed!" -ForegroundColor Red
+    exit 1
+}
+
+# If this server still has an old physical publish directory, migrate its persistent uploads once.
+ssh "$User@$Server" "if [ -d '$RemoteLiveLink' ] && [ ! -L '$RemoteLiveLink' ]; then cp -a '$RemoteLiveLink/wwwroot/images/posts/.' '$RemotePostsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/images/avatars/.' '$RemoteAvatarsDir/' 2>/dev/null || true; cp -a '$RemoteLiveLink/wwwroot/files/cv/.' '$RemoteCvDir/' 2>/dev/null || true; mv '$RemoteLiveLink' '$RemoteLegacyDir'; fi"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to migrate existing live directory!" -ForegroundColor Red
+    exit 1
+}
+
+# Step 4: Upload the new release
+Write-Host "`n[4/6] Uploading release files to $RemoteReleaseDir..." -ForegroundColor Yellow
+ssh "$User@$Server" "mkdir -p '$RemoteReleaseDir'"
+scp -r "$PublishDir\*" "$User@${Server}:$RemoteReleaseDir"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Upload failed!" -ForegroundColor Red
@@ -34,9 +73,57 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Upload completed successfully" -ForegroundColor Green
 
-# Step 4: Clear compressed CSS, restart service
-Write-Host "`n[4/4] Clearing compressed CSS and restarting service..." -ForegroundColor Yellow
-ssh $User@$Server "rm -f $RemotePath/wwwroot/css/site.css.br $RemotePath/wwwroot/css/site.css.gz && sudo systemctl start pearlxcore"
+# Step 5: Wire persistent shared assets into the release, then switch the live symlink.
+Write-Host "`n[5/6] Switching live release atomically..." -ForegroundColor Yellow
+ssh "$User@$Server" @"
+set -e
+mkdir -p '$RemoteReleaseDir/wwwroot/images' '$RemoteReleaseDir/wwwroot/files'
+ln -sfnT '$RemotePostsDir' '$RemoteReleaseDir/wwwroot/images/posts'
+ln -sfnT '$RemoteAvatarsDir' '$RemoteReleaseDir/wwwroot/images/avatars'
+ln -sfnT '$RemoteCvDir' '$RemoteReleaseDir/wwwroot/files/cv'
+ln -sfnT '$RemoteReleaseDir' '$RemoteLiveLink'
+"@
 
-Write-Host "`n✅ Deployment completed!" -ForegroundColor Green
-Write-Host "Visit: http://$Server" -ForegroundColor Cyan
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to switch live release!" -ForegroundColor Red
+    exit 1
+}
+
+# Step 6: Restart service and verify health.
+Write-Host "`n[6/6] Restarting service and running health check..." -ForegroundColor Yellow
+ssh "$User@$Server" "sudo systemctl restart pearlxcore"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Service restart failed!" -ForegroundColor Red
+    exit 1
+}
+
+Start-Sleep -Seconds 3
+
+$HealthCheckPassed = $false
+for ($attempt = 1; $attempt -le 5; $attempt++) {
+    ssh "$User@$Server" "curl -fsS http://127.0.0.1:5000/ >/dev/null"
+    if ($LASTEXITCODE -eq 0) {
+        $HealthCheckPassed = $true
+        break
+    }
+
+    Start-Sleep -Seconds 2
+}
+
+if (-not $HealthCheckPassed) {
+    Write-Host "Health check failed, attempting rollback..." -ForegroundColor Red
+
+    if ($PreviousLiveTarget) {
+        ssh "$User@$Server" "ln -sfnT '$PreviousLiveTarget' '$RemoteLiveLink' && sudo systemctl restart pearlxcore"
+    }
+    else {
+        ssh "$User@$Server" "rm -f '$RemoteLiveLink' && mv '$RemoteLegacyDir' '$RemoteLiveLink' && sudo systemctl restart pearlxcore"
+    }
+
+    exit 1
+}
+
+Write-Host "`nDeployment completed successfully." -ForegroundColor Green
+Write-Host "Live release: $RemoteReleaseDir" -ForegroundColor Cyan
+Write-Host "Active path: $RemoteLiveLink" -ForegroundColor Cyan

@@ -3,12 +3,14 @@ using pearlxcore.dev.Models;
 using pearlxcore.dev.Models.Entities;
 using pearlxcore.dev.Services.Interfaces;
 using pearlxcore.dev.Web.Data;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using Markdig;
 using Serilog;
 using Ganss.Xss;
+using Microsoft.Extensions.FileProviders;
 
 namespace pearlxcore.dev.Services.Implementations;
 
@@ -21,6 +23,11 @@ public class PostService : IPostService
     {
         _db = db;
         _webHostEnvironment = webHostEnvironment;
+    }
+
+    public PostService(ApplicationDbContext db)
+        : this(db, new TestWebHostEnvironment())
+    {
     }
 
     public async Task<IEnumerable<Post>> GetAllAsync()
@@ -229,14 +236,17 @@ public class PostService : IPostService
     static PostService()
     {
         // Configure allowed tags and attributes for safe rendering
-        _htmlSanitizer.AllowedTags.Add("div");
-        _htmlSanitizer.AllowedTags.Add("section");
-        _htmlSanitizer.AllowedTags.Add("img");
+        foreach (var tag in new[] { "div", "section", "pre", "code", "blockquote", "p", "br", "hr", "ul", "ol", "li", "span", "strong", "em", "a", "img", "h1", "h2", "h3", "h4", "h5", "h6" })
+        {
+            _htmlSanitizer.AllowedTags.Add(tag);
+        }
         _htmlSanitizer.AllowedAttributes.Add("class");
         _htmlSanitizer.AllowedAttributes.Add("id");
         _htmlSanitizer.AllowedAttributes.Add("style");
         _htmlSanitizer.AllowedAttributes.Add("src");
         _htmlSanitizer.AllowedAttributes.Add("alt");
+        _htmlSanitizer.AllowedAttributes.Add("href");
+        _htmlSanitizer.AllowedAttributes.Add("title");
         _htmlSanitizer.AllowedCssProperties.Add("color");
         _htmlSanitizer.AllowedCssProperties.Add("background-color");
         _htmlSanitizer.AllowedCssProperties.Add("text-align");
@@ -390,7 +400,7 @@ public class PostService : IPostService
             return null;
 
         var fileName = $"{Guid.NewGuid()}{fileExtension}";
-        var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts");
+        var uploadPath = GetPostImageUploadPath();
 
         try
         {
@@ -420,6 +430,11 @@ public class PostService : IPostService
             Log.Error(ex, "Error uploading image: {FileName}", fileName);
             return null;
         }
+    }
+
+    private string GetPostImageUploadPath()
+    {
+        return Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "pearlxcore.uploads", "posts"));
     }
 
     // Dashboard Statistics
@@ -508,6 +523,16 @@ public class PostService : IPostService
             .ToListAsync();
 
         return relatedPosts;
+    }
+
+    private sealed class TestWebHostEnvironment : IWebHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = Environments.Development;
+        public string ApplicationName { get; set; } = "pearlxcore.dev.Tests";
+        public string WebRootPath { get; set; } = Path.Combine(Path.GetTempPath(), "pearlxcore-webroot");
+        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
+        public string ContentRootPath { get; set; } = Path.GetTempPath();
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 
 }

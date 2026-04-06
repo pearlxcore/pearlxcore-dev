@@ -9,7 +9,6 @@ public class DashboardController : AdminController
     private readonly IPostService _postService;
     private readonly ICategoryService _categoryService;
     private readonly ITagService _tagService;
-    private readonly INewsletterService _newsletterService;
     private readonly IAdminProfileService _profileService;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -17,14 +16,12 @@ public class DashboardController : AdminController
         IPostService postService,
         ICategoryService categoryService,
         ITagService tagService,
-        INewsletterService newsletterService,
         IAdminProfileService profileService,
         IWebHostEnvironment webHostEnvironment)
     {
         _postService = postService;
         _categoryService = categoryService;
         _tagService = tagService;
-        _newsletterService = newsletterService;
         _profileService = profileService;
         _webHostEnvironment = webHostEnvironment;
     }
@@ -39,7 +36,6 @@ public class DashboardController : AdminController
             ScheduledPosts = await _postService.GetScheduledCountAsync(),
             TotalCategories = (await _categoryService.GetAllAsync()).Count(),
             TotalTags = (await _tagService.GetAllAsync()).Count(),
-            NewsletterSubscribers = await _newsletterService.GetActiveCountAsync(),
             RecentPosts = await _postService.GetRecentPostsAsync(5),
             RecentDrafts = await _postService.GetRecentDraftsAsync(5),
             ScheduledPostsList = await _postService.GetScheduledPostsAsync(5),
@@ -55,11 +51,20 @@ public class DashboardController : AdminController
         }
 
         // Calculate image storage
-        var imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts");
-        if (Directory.Exists(imagesPath))
+        var imagesPaths = new[]
         {
-            var imageFiles = Directory.GetFiles(imagesPath, "*.*", SearchOption.AllDirectories);
-            viewModel.TotalImagesCount = imageFiles.Length;
+            Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "pearlxcore.uploads", "posts")),
+            Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts")
+        };
+
+        var imageFiles = imagesPaths
+            .Where(Directory.Exists)
+            .SelectMany(path => Directory.GetFiles(path, "*.*", SearchOption.AllDirectories))
+            .ToList();
+
+        if (imageFiles.Any())
+        {
+            viewModel.TotalImagesCount = imageFiles.Count;
             viewModel.TotalImagesSize = imageFiles.Sum(f => new FileInfo(f).Length);
         }
 

@@ -21,78 +21,63 @@
             </div>
         </div>
         <div class="col-sm-6 col-lg-3 mb-4">
-            <div class="dashboard-stat">
+            <div class="dashboard-stat dashboard-stat--success">
                 <div class="dashboard-stat__content">
                     <p class="dashboard-stat__label">Published</p>
-                    <h3 class="dashboard-stat__value" style="color: #28a745;">@Model.PublishedPosts</h3>
+                    <h3 class="dashboard-stat__value">@Model.PublishedPosts</h3>
                 </div>
-                <i class="fas fa-check-circle dashboard-stat__icon" style="color: #28a745;"></i>
+                <i class="fas fa-check-circle dashboard-stat__icon"></i>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3 mb-4">
-            <div class="dashboard-stat">
+            <div class="dashboard-stat dashboard-stat--muted">
                 <div class="dashboard-stat__content">
                     <p class="dashboard-stat__label">Drafts</p>
-                    <h3 class="dashboard-stat__value" style="color: #6c757d;">@Model.DraftPosts</h3>
+                    <h3 class="dashboard-stat__value">@Model.DraftPosts</h3>
                 </div>
-                <i class="fas fa-edit dashboard-stat__icon" style="color: #6c757d;"></i>
+                <i class="fas fa-edit dashboard-stat__icon"></i>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3 mb-4">
-            <div class="dashboard-stat">
+            <div class="dashboard-stat dashboard-stat--warning">
                 <div class="dashboard-stat__content">
                     <p class="dashboard-stat__label">Scheduled</p>
-                    <h3 class="dashboard-stat__value" style="color: #ffc107;">@Model.ScheduledPosts</h3>
+                    <h3 class="dashboard-stat__value">@Model.ScheduledPosts</h3>
                 </div>
-                <i class="fas fa-clock dashboard-stat__icon" style="color: #ffc107;"></i>
+                <i class="fas fa-clock dashboard-stat__icon"></i>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3 mb-4">
-            <div class="dashboard-stat">
+            <div class="dashboard-stat dashboard-stat--info">
                 <div class="dashboard-stat__content">
                     <p class="dashboard-stat__label">Categories</p>
-                    <h3 class="dashboard-stat__value" style="color: #0dcaf0;">@Model.TotalCategories</h3>
+                    <h3 class="dashboard-stat__value">@Model.TotalCategories</h3>
                 </div>
-                <i class="fas fa-list dashboard-stat__icon" style="color: #0dcaf0;"></i>
+                <i class="fas fa-list dashboard-stat__icon"></i>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3 mb-4">
-            <div class="dashboard-stat">
+            <div class="dashboard-stat dashboard-stat--purple">
                 <div class="dashboard-stat__content">
                     <p class="dashboard-stat__label">Tags</p>
-                    <h3 class="dashboard-stat__value" style="color: #6f42c1;">@Model.TotalTags</h3>
+                    <h3 class="dashboard-stat__value">@Model.TotalTags</h3>
                 </div>
-                <i class="fas fa-tags dashboard-stat__icon" style="color: #6f42c1;"></i>
+                <i class="fas fa-tags dashboard-stat__icon"></i>
             </div>
         </div>
     </div>
 
     <div class="row mb-5">
         <div class="col-sm-6 col-lg-3 mb-4">
-            <a asp-area="Admin" asp-controller="Newsletter" asp-action="Index" style="text-decoration: none; color: inherit;">
-                <div class="card h-100" style="border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)'; this.style.transform='translateY(0)'">
-                    <div class="card-body">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">SUBSCRIBERS</p>
-                                <h3 style="font-size: 2.5rem; font-weight: 700; margin: 0; color: #198754;">@Model.NewsletterSubscribers</h3>
-                            </div>
-                            <i class="fas fa-envelope" style="font-size: 2rem; color: #198754; opacity: 0.6;"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3 mb-4">
-            <div class="card h-100" style="border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)'; this.style.transform='translateY(0)'">
+            <div class="card admin-summary-card h-100">
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
-                            <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">IMAGES</p>
-                            <h3 style="font-size: 2.5rem; font-weight: 700; margin: 0; color: #dc3545;">@Model.TotalImagesCount</h3>
-                            <p class="text-muted mb-0" style="font-size: 0.75rem;">@Model.FormattedImageSize</p>
+                            <p class="admin-summary-card__label mb-1">IMAGES</p>
+                            <h3 class="admin-summary-card__value admin-summary-card__value--danger">@Model.TotalImagesCount</h3>
+                            <p class="admin-summary-card__meta mb-0">@Model.FormattedImageSize</p>
                         </div>
-                        <i class="fas fa-image" style="font-size: 2rem; color: #dc3545; opacity: 0.6;"></i>
+                        <i class="fas fa-image admin-summary-card__icon admin-summary-card__icon--danger"></i>
                     </div>
                 </div>
             </div>
@@ -100,15 +85,15 @@
         @if (!string.IsNullOrEmpty(Model.LastPublishedTitle))
         {
             <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card h-100" style="border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)'; this.style.transform='translateY(0)'">
+                <div class="card admin-summary-card h-100">
                     <div class="card-body">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div style="flex: 1;">
-                                <p class="text-muted mb-1" style="font-size: 0.85rem; font-weight: 500;">LAST PUBLISHED</p>
-                                <h5 style="font-size: 1.25rem; font-weight: 600; margin: 0; margin-bottom: 0.25rem;">@Model.LastPublishedTitle</h5>
-                                <p class="text-muted mb-0" style="font-size: 0.85rem;">@Model.LastPublishedDate?.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
+                                <p class="admin-summary-card__label mb-1">LAST PUBLISHED</p>
+                                <h5 class="admin-summary-card__title mb-1">@Model.LastPublishedTitle</h5>
+                                <p class="admin-summary-card__meta mb-0">@Model.LastPublishedDate?.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
                             </div>
-                            <i class="fas fa-star" style="font-size: 2rem; color: var(--muted-text); opacity: 0.6;"></i>
+                            <i class="fas fa-star admin-summary-card__icon"></i>
                         </div>
                     </div>
                 </div>
@@ -118,18 +103,18 @@
 
     <div class="row mb-5">
         <div class="col-lg-6 mb-4">
-            <div class="content-section">
-                <div class="content-section__header">
-                    <h3 class="content-section__title">
+            <div class="content-section admin-dashboard-feed">
+                <div class="content-section__header admin-dashboard-feed__header">
+                    <h3 class="content-section__title admin-dashboard-feed__title">
                         <i class="fas fa-check-circle"></i> Recent Posts
                     </h3>
                 </div>
                 @if (Model.RecentPosts.Any())
                 {
-                    <ul class="content-list">
+                    <ul class="content-list admin-dashboard-feed__list">
                         @foreach (var post in Model.RecentPosts)
                         {
-                            <li class="content-list__item">
+                            <li class="content-list__item admin-dashboard-feed__item">
                                 <div class="content-list__left">
                                     <h4 class="content-list__title">
                                         <a asp-area="Admin" asp-controller="Posts" asp-action="Edit" asp-route-id="@post.Id">@post.Title</a>
@@ -151,24 +136,24 @@
                 }
                 else
                 {
-                    <div class="content-list__empty">No published posts yet.</div>
+                    <div class="content-list__empty admin-dashboard-feed__empty">No published posts yet.</div>
                 }
             </div>
         </div>
 
         <div class="col-lg-6 mb-4">
-            <div class="content-section">
-                <div class="content-section__header">
-                    <h3 class="content-section__title">
+            <div class="content-section admin-dashboard-feed">
+                <div class="content-section__header admin-dashboard-feed__header">
+                    <h3 class="content-section__title admin-dashboard-feed__title">
                         <i class="fas fa-pencil-alt"></i> Recent Drafts
                     </h3>
                 </div>
                 @if (Model.RecentDrafts.Any())
                 {
-                    <ul class="content-list">
+                    <ul class="content-list admin-dashboard-feed__list">
                         @foreach (var post in Model.RecentDrafts)
                         {
-                            <li class="content-list__item">
+                            <li class="content-list__item admin-dashboard-feed__item">
                                 <div class="content-list__left">
                                     <h4 class="content-list__title">
                                         <a asp-area="Admin" asp-controller="Posts" asp-action="Edit" asp-route-id="@post.Id">@post.Title</a>
@@ -190,7 +175,7 @@
                 }
                 else
                 {
-                    <div class="content-list__empty">No drafts.</div>
+                    <div class="content-list__empty admin-dashboard-feed__empty">No drafts.</div>
                 }
             </div>
         </div>
@@ -200,9 +185,9 @@
     {
         <div class="row mb-5">
             <div class="col-12">
-                <div class="card" style="border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                    <div class="card-header bg-white" style="border-bottom: 2px solid #ffc107;">
-                        <h5 class="mb-0" style="font-weight: 600; color: #ffc107;"><i class="fas fa-hourglass-end" style="margin-right: 0.5rem;"></i>Scheduled Posts</h5>
+                <div class="card admin-scheduled-card">
+                    <div class="card-header admin-scheduled-card__header">
+                        <h5 class="mb-0 admin-scheduled-card__title"><i class="fas fa-hourglass-end"></i>Scheduled Posts</h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">

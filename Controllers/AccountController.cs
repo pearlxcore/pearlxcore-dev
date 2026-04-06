@@ -81,13 +81,7 @@ public class AccountController : Controller
     public async Task<IActionResult> LogoutConfirmed()
     {
         await _signInManager.SignOutAsync();
-        return RedirectToAction("LoggedOut");
-    }
-
-    [HttpGet]
-    public IActionResult LoggedOut()
-    {
-        return View();
+        return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]

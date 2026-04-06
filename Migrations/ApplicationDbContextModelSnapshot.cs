@@ -319,42 +319,6 @@ namespace pearlxcore.dev.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("pearlxcore.dev.Models.Entities.NewsletterSubscriber", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("SubscribedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UnsubscribeToken")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UnsubscribedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("UnsubscribeToken");
-
-                    b.ToTable("NewsletterSubscribers");
-                });
-
             modelBuilder.Entity("pearlxcore.dev.Models.Entities.Post", b =>
                 {
                     b.Property<int>("Id")

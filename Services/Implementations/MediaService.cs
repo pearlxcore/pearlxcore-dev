@@ -14,14 +14,18 @@ public class MediaService : IMediaService
 
     public async Task<List<MediaFileInfo>> GetAllImagesAsync()
     {
-        var imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts");
+        var imagesPath = GetImageDirectories();
         var mediaFiles = new List<MediaFileInfo>();
 
-        if (!Directory.Exists(imagesPath))
+        if (!imagesPath.Any())
             return mediaFiles;
 
-        var files = Directory.GetFiles(imagesPath, "*.*", SearchOption.AllDirectories)
+        var files = imagesPath
+            .Where(Directory.Exists)
+            .SelectMany(path => Directory.GetFiles(path, "*.*", SearchOption.AllDirectories))
             .Where(f => IsImageFile(f))
+            .GroupBy(f => Path.GetFileName(f), StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(f => new FileInfo(f).CreationTime).First())
             .OrderByDescending(f => new FileInfo(f).CreationTime)
             .ToList();
 
@@ -44,24 +48,25 @@ public class MediaService : IMediaService
     {
         try
         {
-            var imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts");
-            var filePath = Path.Combine(imagesPath, fileName);
-
-            // Security: Ensure the file is within the images/posts directory
-            var fullPath = Path.GetFullPath(filePath);
-            var fullImagesPath = Path.GetFullPath(imagesPath);
-
-            if (!fullPath.StartsWith(fullImagesPath))
+            foreach (var imagesPath in GetImageDirectories())
             {
-                Log.Warning("Security warning: Attempted to delete image outside allowed directory: {FileName}", fileName);
-                return false;
-            }
+                var filePath = Path.Combine(imagesPath, fileName);
 
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-                Log.Information("Image deleted: {FileName}", fileName);
-                return await Task.FromResult(true);
+                // Security: Ensure the file is within the images/posts directory
+                var fullPath = Path.GetFullPath(filePath);
+                var fullImagesPath = Path.GetFullPath(imagesPath);
+
+                if (!fullPath.StartsWith(fullImagesPath))
+                {
+                    continue;
+                }
+
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    Log.Information("Image deleted: {FileName}", fileName);
+                    return await Task.FromResult(true);
+                }
             }
 
             Log.Warning("Image file not found for deletion: {FileName}", fileName);
@@ -79,5 +84,14 @@ public class MediaService : IMediaService
         var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
         var extension = Path.GetExtension(filePath).ToLower();
         return allowedExtensions.Contains(extension);
+    }
+
+    private List<string> GetImageDirectories()
+    {
+        return
+        [
+            Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "pearlxcore.uploads", "posts")),
+            Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts")
+        ];
     }
 }

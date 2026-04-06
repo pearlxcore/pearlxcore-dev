@@ -7,17 +7,28 @@ namespace pearlxcore.dev.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IPostService _postService;
         private readonly IAdminProfileService _profileService;
 
-        public HomeController(IAdminProfileService profileService)
+        public HomeController(IPostService postService, IAdminProfileService profileService)
         {
+            _postService = postService;
             _profileService = profileService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? page)
         {
-            // Redirect to blog as the main page
-            return RedirectToAction("Index", "Blog");
+            const int pageSize = 10;
+            var currentPage = page ?? 1;
+
+            var paginatedPosts = await _postService.GetPublishedPaginatedAsync(currentPage, pageSize);
+            var allPublishedPosts = await _postService.GetPublishedAsync();
+            var profile = await _profileService.GetAsync();
+
+            ViewData["AdminProfile"] = profile;
+            ViewData["AllPublishedPosts"] = allPublishedPosts;
+
+            return View("~/Views/Blog/Index.cshtml", paginatedPosts);
         }
 
         public async Task<IActionResult> About()
@@ -37,7 +48,7 @@ namespace pearlxcore.dev.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult StatusCode(int code)
+        public new IActionResult StatusCode(int code)
         {
             if (code == 404)
                 return View("NotFound");

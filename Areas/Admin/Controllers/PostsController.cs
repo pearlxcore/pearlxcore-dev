@@ -87,7 +87,7 @@ public class PostsController : AdminController
         var post = new Post
         {
             Title = model.Title,
-            Slug = model.Slug,
+            Slug = model.Slug ?? string.Empty,
             Content = model.Content,
             Summary = model.Summary,
             ImageUrl = finalImageUrl,
@@ -168,7 +168,7 @@ public class PostsController : AdminController
         }
 
         post.Title = model.Title;
-        post.Slug = model.Slug;
+        post.Slug = model.Slug ?? post.Slug;
         post.Content = model.Content;
         post.Summary = model.Summary;
         post.ImageUrl = model.RemoveImage ? null : (imageUrl ?? post.ImageUrl);
@@ -217,10 +217,16 @@ public class PostsController : AdminController
         
         // Sanitize the HTML to prevent XSS attacks in preview
         var sanitizer = new HtmlSanitizer();
-        sanitizer.AllowedTags.Add("div");
-        sanitizer.AllowedTags.Add("section");
+        foreach (var tag in new[] { "div", "section", "pre", "code", "blockquote", "p", "br", "hr", "ul", "ol", "li", "span", "strong", "em", "a", "img", "h1", "h2", "h3", "h4", "h5", "h6" })
+        {
+            sanitizer.AllowedTags.Add(tag);
+        }
         sanitizer.AllowedAttributes.Add("class");
         sanitizer.AllowedAttributes.Add("id");
+        sanitizer.AllowedAttributes.Add("href");
+        sanitizer.AllowedAttributes.Add("title");
+        sanitizer.AllowedAttributes.Add("src");
+        sanitizer.AllowedAttributes.Add("alt");
         
         var sanitizedHtml = sanitizer.Sanitize(rawHtml);
 

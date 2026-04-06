@@ -12,6 +12,10 @@ logs/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+publish/
+published/
+.artifacts/
+.publish/
 x64/
 x86/
 [Aa][Rr][Mm]/

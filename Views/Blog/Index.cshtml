@@ -1,16 +1,18 @@
 ﻿@model pearlxcore.dev.Models.PaginatedList<pearlxcore.dev.Models.Entities.Post>
 @{
     ViewData["MetaDescription"] = "Articles on homelab infrastructure, ASP.NET Core, and personal engineering projects.";
-    ViewData["Title"] = "Blog";
+    ViewData["Title"] = "Latest Posts";
     var adminProfile = ViewData["AdminProfile"] as pearlxcore.dev.Models.Entities.AdminProfile;
+    var allPublishedPosts = (ViewData["AllPublishedPosts"] as IEnumerable<pearlxcore.dev.Models.Entities.Post>) ?? Enumerable.Empty<pearlxcore.dev.Models.Entities.Post>();
     var filterType = ViewData["FilterType"] as string;
     var filterSlug = ViewData["FilterSlug"] as string;
 }
 
 <div class="blog-container">
-    <div class="blog-header">
-        <h1 class="blog-header__title">Welcome to pearlxcore's weblog</h1>
-        <p class="blog-subtitle">A personal blog documenting homelab experiments, software engineering, and technical journeys.</p>
+    <div class="blog-hero">
+        <div class="blog-hero__eyebrow">Homelab logs and engineering notes</div>
+        <h1 class="blog-hero__title">Welcome to pearlxcore.dev</h1>
+        <p class="blog-hero__subtitle">A personal blog documenting homelab experiments, software engineering, and technical journeys.</p>
     </div>
 
     @* Search Bar *@
@@ -38,14 +40,17 @@
     }
 
     @* Main Content with Sidebar *@
-    <div class="blog-layout">
+    <div class="blog-layout" id="latest-posts">
         <div class="blog-main">
         @if (!Model.Items.Any())
         {
-            <div class="alert alert-info text-center py-5">
-                <h4>No Articles Yet</h4>
-                <p class="mb-2">There are no published articles to display at the moment.</p>
-                <p class="mb-0 text-muted">Come back soon for new content!</p>
+            <div class="empty-state">
+                <div class="empty-state__icon" aria-hidden="true">
+                    <i class="fa-regular fa-newspaper"></i>
+                </div>
+                <h4 class="empty-state__title">No Articles Yet</h4>
+                <p class="empty-state__text">There are no published articles to display at the moment.</p>
+                <p class="empty-state__text mb-0">Come back soon for new content!</p>
             </div>
         }
         else
@@ -281,12 +286,10 @@
 
         @* Sidebar - Categories & Tags *@
         <aside class="blog-sidebar">
-            <div class="blog-sidebar__inner">
+            <div class="blog-sidebar__inner blog-sidebar__panel">
                 <h3 class="blog-sidebar__heading">Categories</h3>
                 <div class="categories-list">
                     @{
-                        var allPublishedPosts = (ViewData["AllPublishedPosts"] as IEnumerable<pearlxcore.dev.Models.Entities.Post>) ?? Enumerable.Empty<pearlxcore.dev.Models.Entities.Post>();
-                        var postCount = allPublishedPosts.Count();
                         var allCategories = new Dictionary<string, (string name, int count)>();
                         
                         foreach (var post in allPublishedPosts)

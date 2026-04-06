@@ -15,25 +15,28 @@
 
     <header class="header admin-header">
         <div class="header-content">
-            <a class="logo" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">pearlxcore.dev</a>
-            <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle menu" aria-expanded="false">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <nav class="admin-nav" id="adminNav">
-                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                <a asp-area="Admin" asp-controller="Posts" asp-action="Index">Posts</a>
-                <a asp-area="Admin" asp-controller="Categories" asp-action="Index">Categories</a>
-                <a asp-area="Admin" asp-controller="Tags" asp-action="Index">Tags</a>
-                <a asp-area="Admin" asp-controller="Media" asp-action="Index">Media</a>
-                <a asp-area="Admin" asp-controller="Logs" asp-action="Index">Logs</a>
-                <a asp-area="Admin" asp-controller="Newsletter" asp-action="Index">Newsletter</a>
-                <a asp-area="" asp-controller="Blog" asp-action="Index">Blog</a>
-                <a asp-area="Admin" asp-controller="Profile" asp-action="About">About Me</a>
-                <a asp-area="Admin" asp-controller="Settings" asp-action="Index">Settings</a>
-                <a asp-area="" asp-controller="Account" asp-action="Logout" class="logout-btn">Logout</a>
-            </nav>
+            <div class="admin-brand">
+                <a class="logo" asp-area="" asp-controller="Home" asp-action="Index">pearlxcore.dev</a>
+                <span class="admin-brand__badge">Admin</span>
+            </div>
+            <div class="admin-menu">
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle menu" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <nav class="admin-nav" id="adminNav">
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                    <a asp-area="Admin" asp-controller="Posts" asp-action="Index">Posts</a>
+                    <a asp-area="Admin" asp-controller="Categories" asp-action="Index">Categories</a>
+                    <a asp-area="Admin" asp-controller="Tags" asp-action="Index">Tags</a>
+                    <a asp-area="Admin" asp-controller="Media" asp-action="Index">Media</a>
+                    <a asp-area="Admin" asp-controller="Logs" asp-action="Index">Logs</a>
+                    <a asp-area="Admin" asp-controller="Profile" asp-action="About">About Me</a>
+                    <a asp-area="Admin" asp-controller="Settings" asp-action="Index">Settings</a>
+                    <a asp-area="" asp-controller="Account" asp-action="Logout" class="logout-btn">Logout</a>
+                </nav>
+            </div>
         </div>
     </header>
 
@@ -48,6 +51,7 @@
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/markdown-highlighter.js" asp-append-version="true"></script>
     <script>
         // Admin hamburger menu
         const adminHamburger = document.getElementById('adminHamburger');
@@ -79,6 +83,30 @@
                 }
             });
         }
+
+        document.querySelectorAll('[data-file-upload]').forEach((wrapper) => {
+            const input = wrapper.querySelector('.file-upload__input');
+            const button = wrapper.querySelector('.file-upload__button');
+            const text = wrapper.querySelector('.file-upload__text');
+
+            if (!input || !button || !text) {
+                return;
+            }
+
+            const updateText = () => {
+                if (input.files && input.files.length > 0) {
+                    text.value = input.files.length === 1
+                        ? input.files[0].name
+                        : `${input.files.length} files selected`;
+                } else {
+                    text.value = 'No file chosen';
+                }
+            };
+
+            button.addEventListener('click', () => input.click());
+            input.addEventListener('change', updateText);
+            updateText();
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

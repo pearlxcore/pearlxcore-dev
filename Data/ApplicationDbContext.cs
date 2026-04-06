@@ -1,5 +1,4 @@
 using pearlxcore.dev.Models.Entities;
-using pearlxcore.dev.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +17,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<PostCategory> PostCategories => Set<PostCategory>();
     public DbSet<PostTag> PostTags => Set<PostTag>();
     public DbSet<AdminProfile> AdminProfiles => Set<AdminProfile>();
-    public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -31,7 +29,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         ConfigurePostCategory(builder);
         ConfigurePostTag(builder);
             ConfigureAdminProfile(builder);
-        ConfigureNewsletterSubscriber(builder);
     }
 
     private static void ConfigurePost(ModelBuilder builder)
@@ -161,26 +158,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
             entity.Property(p => p.UpdatedAt)
                   .IsRequired();
-        });
-    }
-
-    private static void ConfigureNewsletterSubscriber(ModelBuilder builder)
-    {
-        builder.Entity<NewsletterSubscriber>(entity =>
-        {
-            entity.HasKey(s => s.Id);
-
-            entity.Property(s => s.Email)
-                  .HasMaxLength(255)
-                  .IsRequired();
-
-            entity.HasIndex(s => s.Email)
-                  .IsUnique();
-
-            entity.Property(s => s.UnsubscribeToken)
-                  .HasMaxLength(100);
-
-            entity.HasIndex(s => s.UnsubscribeToken);
         });
     }
 

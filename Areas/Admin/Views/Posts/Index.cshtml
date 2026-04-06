@@ -6,12 +6,12 @@
 
 <div class="admin-page">
     <div class="page-header mb-5">
-        <div class="admin-header-top">
-            <div>
-                <h1 class="page-title">Posts</h1>
-                <p class="page-subtitle">Create, edit, and manage your blog articles</p>
-            </div>
-            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i><span>New Post</span></a>
+        <h1 class="page-title">Posts</h1>
+        <p class="page-subtitle">Create, edit, and manage your blog articles</p>
+        <div class="page-header__actions">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus"></i><span>Create Post</span>
+            </a>
         </div>
     </div>
 
@@ -63,7 +63,7 @@
                         <a asp-action="Edit" asp-route-id="@post.Id" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i><span>Edit</span></a>
                         <form method="post" asp-action="Delete" asp-route-id="@post.Id" class="post-list-item__delete-form" onsubmit="return confirm('Delete this post permanently?');">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i><span>Delete</span></button>
+                            <button type="submit" class="btn btn-sm admin-surface-card__delete"><i class="fas fa-trash"></i><span>Delete</span></button>
                         </form>
                     </div>
                 </div>

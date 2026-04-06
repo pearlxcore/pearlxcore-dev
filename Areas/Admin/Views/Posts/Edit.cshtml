@@ -64,7 +64,11 @@
 
             <div class="form-group">
                 <label asp-for="ImageFile">Upload Image</label>
-                <input asp-for="ImageFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                <div class="file-upload" data-file-upload>
+                    <input asp-for="ImageFile" type="file" class="file-upload__input" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                    <button type="button" class="file-upload__button">Choose File</button>
+                    <input type="text" class="file-upload__text" value="No file chosen" readonly />
+                </div>
                 <span asp-validation-for="ImageFile" class="text-danger"></span>
                 <small>JPG, PNG, GIF, WebP • Max 5MB</small>
             </div>
@@ -175,7 +179,7 @@
                 <i class="fas fa-save"></i>
                 <span>Save Changes</span>
             </button>
-            <a asp-action="Index" class="btn btn-secondary" style="opacity: 1 !important; visibility: visible !important; display: inline-flex !important; pointer-events: auto !important; text-decoration: none !important;">
+            <a asp-action="Index" class="btn btn-back-cancel" style="opacity: 1 !important; visibility: visible !important; display: inline-flex !important; pointer-events: auto !important;">
                 <i class="fas fa-arrow-left"></i>
                 <span>Back to Posts</span>
             </a>
@@ -210,7 +214,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="~/js/editor.js"></script>
+    <script src="~/js/editor.js" asp-append-version="true"></script>
     <script>
         (function() {
             const maxSizeBytes = 5 * 1024 * 1024; // 5MB

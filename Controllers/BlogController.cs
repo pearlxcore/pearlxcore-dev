@@ -42,7 +42,7 @@ public class BlogController : Controller
         ViewData["AdminProfile"] = profile;
 
         // Get related posts
-        var relatedPosts = await _postService.GetRelatedPostsAsync(post.Id, limit: 3);
+        var relatedPosts = await _postService.GetRelatedPostsAsync(post.Id, limit: 2);
         ViewData["RelatedPosts"] = relatedPosts;
 
         return View(post);

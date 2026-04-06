@@ -5,15 +5,14 @@
 }
 
 <div class="admin-page">
-    <div class="page-header mb-4 d-flex align-items-center justify-content-between">
+    <div class="page-header page-header--centered mb-4">
         <div>
             <h1 class="page-title mb-1">About Me</h1>
             <p class="text-muted mb-0">Profile details for your admin identity</p>
         </div>
-        <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card admin-surface-card">
         <div class="card-body d-flex flex-wrap gap-4 align-items-start">
             <div class="avatar-wrapper" style="width:140px;">
                 @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
@@ -45,6 +44,9 @@
                 </div>
                 <p class="text-muted small mt-3">Last updated: @Model.UpdatedAt.ToLocalTime().ToString("g")</p>
             </div>
+        </div>
+        <div class="card-footer admin-card-footer">
+            <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
         </div>
     </div>
 </div>

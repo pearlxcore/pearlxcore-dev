@@ -10,7 +10,6 @@ public class DashboardViewModel
     public int ScheduledPosts { get; set; }
     public int TotalCategories { get; set; }
     public int TotalTags { get; set; }
-    public int NewsletterSubscribers { get; set; }
     
     public List<Post> RecentPosts { get; set; } = new();
     public List<Post> RecentDrafts { get; set; } = new();

@@ -10,29 +10,25 @@ namespace pearlxcore.dev.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Categories_Posts_PostId",
-                table: "Categories");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'[FK_Categories_Posts_PostId]', N'F') IS NOT NULL
+    ALTER TABLE [Categories] DROP CONSTRAINT [FK_Categories_Posts_PostId];
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Tags_Posts_PostId",
-                table: "Tags");
+IF OBJECT_ID(N'[FK_Tags_Posts_PostId]', N'F') IS NOT NULL
+    ALTER TABLE [Tags] DROP CONSTRAINT [FK_Tags_Posts_PostId];
 
-            migrationBuilder.DropIndex(
-                name: "IX_Tags_PostId",
-                table: "Tags");
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Tags_PostId' AND object_id = OBJECT_ID(N'[Tags]'))
+    DROP INDEX [IX_Tags_PostId] ON [Tags];
 
-            migrationBuilder.DropIndex(
-                name: "IX_Categories_PostId",
-                table: "Categories");
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Categories_PostId' AND object_id = OBJECT_ID(N'[Categories]'))
+    DROP INDEX [IX_Categories_PostId] ON [Categories];
 
-            migrationBuilder.DropColumn(
-                name: "PostId",
-                table: "Tags");
+IF COL_LENGTH(N'[Tags]', N'PostId') IS NOT NULL
+    ALTER TABLE [Tags] DROP COLUMN [PostId];
 
-            migrationBuilder.DropColumn(
-                name: "PostId",
-                table: "Categories");
+IF COL_LENGTH(N'[Categories]', N'PostId') IS NOT NULL
+    ALTER TABLE [Categories] DROP COLUMN [PostId];
+");
         }
 
         /// <inheritdoc />

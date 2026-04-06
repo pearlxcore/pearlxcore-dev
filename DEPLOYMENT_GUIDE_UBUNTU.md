@@ -467,15 +467,15 @@ dotnet clean
 # Restore dependencies
 dotnet restore
 
-# Publish as Release
-dotnet publish -c Release -o "./publish"
+# Publish as Release into an ignored artifact folder
+dotnet publish -c Release -o "./.artifacts/publish"
 
-# This creates a 'publish' folder with all files needed to run on server
+# This creates an ignored '.artifacts/publish' folder with all files needed to run on server
 ```
 
 ### 4.2 Update Production Configuration
 
-Open `publish/appsettings.Production.json` and update:
+Open `.artifacts/publish/appsettings.Production.json` and keep it free of secrets. Put the SQL connection string in `/etc/pearlxcore/pearlxcore.env` as `ConnectionStrings__DefaultConnection=...`.
 
 ```json
 {
@@ -490,9 +490,6 @@ Open `publish/appsettings.Production.json` and update:
         }
       }
     ]
-  },
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=pearlxcore_dev;User Id=sa;Password=Your_SA_Password;TrustServerCertificate=true;"
   },
   "Logging": {
     "LogLevel": {
@@ -512,7 +509,7 @@ Open `publish/appsettings.Production.json` and update:
 **From Windows PowerShell:**
 ```powershell
 # Navigate to publish folder
-cd "c:\Users\User\source\repos\pearlxcore-dev\pearlxcore-dev\publish"
+cd "c:\Users\User\source\repos\pearlxcore-dev\pearlxcore-dev\.artifacts\publish"
 
 # Copy entire publish folder to Ubuntu VM (internal IP)
 scp -r . username@192.168.50.146:/var/www/pearlxcore-dev/
@@ -524,7 +521,7 @@ scp -r . username@192.168.50.146:/var/www/pearlxcore-dev/
 **From Mac/Linux Terminal:**
 ```bash
 # Same command works - use internal IP
-scp -r ~/path/to/publish ubuntu@192.168.50.146:/var/www/pearlxcore-dev/
+scp -r ~/path/to/.artifacts/publish ubuntu@192.168.50.146:/var/www/pearlxcore-dev/
 ```
 
 ### 5.2 Alternative: Using Git
@@ -541,7 +538,7 @@ git clone https://github.com/yourusername/pearlxcore-dev.git
 cd pearlxcore-dev
 
 # Publish on server
-dotnet publish -c Release -o "./published"
+dotnet publish -c Release -o "./.artifacts/publish"
 ```
 
 ### 5.3 Verify Files Transferred
@@ -552,7 +549,7 @@ ssh username@your-server-ip
 # Check files
 ls -la /var/www/pearlxcore-dev/
 
-# Should see: appsettings.json, pearlxcore-dev.dll, etc.
+# Should see: releases/, shared/, and `publish` as a symlink to the active release.
 ```
 
 ---
@@ -579,8 +576,8 @@ After=network.target
 [Service]
 Type=notify
 User=www-data
-WorkingDirectory=/var/www/pearlxcore-dev
-ExecStart=/usr/bin/dotnet /var/www/pearlxcore-dev/pearlxcore-dev.dll
+WorkingDirectory=/var/www/pearlxcore-dev/publish
+ExecStart=/usr/bin/dotnet /var/www/pearlxcore-dev/publish/pearlxcore-dev.dll
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -782,30 +779,46 @@ sudo systemctl reload nginx
 
 ## Step 9: Set Environment Variables
 
-### 9.1 Update Service with Admin Password
+The app reads production secrets from `/etc/pearlxcore/pearlxcore.env` through the systemd `EnvironmentFile=` setting.
+
+That file is not part of the Git repo. It lives only on the server.
+
+### 9.1 Create the Environment File
 
 ```bash
-# Edit service file
-sudo nano /etc/systemd/system/pearlxcore-dev.service
+# Create the directory if it does not exist
+sudo mkdir -p /etc/pearlxcore
 
-# Add this line before [Install] section:
-Environment="LIGHTHOUSE_ADMIN_PASSWORD=YourSecureAdminPassword123!"
-
-# Reload and restart
-sudo systemctl daemon-reload
-sudo systemctl restart pearlxcore-dev
+# Create or edit the environment file
+sudo nano /etc/pearlxcore/pearlxcore.env
 ```
 
-### 9.2 Verify Application is Running
+Paste values like this into the file:
 
 ```bash
+ConnectionStrings__DefaultConnection=Server=127.0.0.1,1433;Database=pearlxcoreDevDb;User Id=sa;Password=CHANGE_ME;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30
+AdminUser__Email=admin@pearlxcore.dev
+AdminUser__Password=CHANGE_ME
+```
+
+You can use [the example file in the repo](./pearlxcore.env.example) as a template.
+
+### 9.2 Reload and Verify
+
+```bash
+# Reload systemd so it reads the env file
+sudo systemctl daemon-reload
+
+# Restart the application
+sudo systemctl restart pearlxcore
+
 # Check if application is listening on port 5000
 sudo netstat -tulpn | grep 5000
 
 # Should show: dotnet process listening on :5000
 
 # Or check logs
-sudo journalctl -u pearlxcore-dev -f
+sudo journalctl -u pearlxcore -f
 ```
 
 ---
@@ -1111,10 +1124,10 @@ sudo openssl s_client -connect pearlxcore.dev:443 -tls1_2
 sudo journalctl -u pearlxcore-dev -n 100
 
 # Restart in foreground to see errors
-sudo -u www-data /usr/bin/dotnet /var/www/pearlxcore-dev/pearlxcore-dev.dll
+sudo -u www-data /usr/bin/dotnet /var/www/pearlxcore-dev/publish/pearlxcore-dev.dll
 
-# Check appsettings.json for valid JSON
-cat /var/www/pearlxcore-dev/appsettings.Production.json | json_pp
+# Check appsettings.Production.json for valid JSON
+cat /var/www/pearlxcore-dev/publish/appsettings.Production.json | json_pp
 ```
 
 ---
@@ -1149,13 +1162,16 @@ When you publish a new version:
 
 ```bash
 # On local machine
-dotnet publish -c Release -o "./publish"
+dotnet publish -c Release -o "./.artifacts/publish"
 
 # Transfer files
-scp -r ./publish/* username@your-server-ip:/var/www/pearlxcore-dev/
+scp -r ./.artifacts/publish/* username@your-server-ip:/var/www/pearlxcore-dev/releases/<timestamp>/
 
 # SSH to server
 ssh username@your-server-ip
+
+# Update the live symlink
+ln -sfnT /var/www/pearlxcore-dev/releases/<timestamp> /var/www/pearlxcore-dev/publish
 
 # Restart application
 sudo systemctl restart pearlxcore-dev
@@ -1179,11 +1195,9 @@ gzip_types text/plain text/css text/xml text/javascript application/json applica
 ```
 
 ### Connection Pooling
-Update appsettings.Production.json:
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=pearlxcore_dev;User Id=sa;Password=Your_Password;Min Pool Size=5;Max Pool Size=20;TrustServerCertificate=true;"
-}
+Set the production connection string in `/etc/pearlxcore/pearlxcore.env` instead of `appsettings.Production.json`:
+```bash
+ConnectionStrings__DefaultConnection=Server=localhost;Database=pearlxcore_dev;User Id=sa;Password=Your_Password;Min Pool Size=5;Max Pool Size=20;TrustServerCertificate=true;
 ```
 
 ---
@@ -1211,9 +1225,9 @@ Update appsettings.Production.json:
 ## Checklist: Ready for Deployment?
 
 - [ ] Application published in Release mode
-- [ ] appsettings.Production.json updated with SQL Server connection
+- [ ] `/etc/pearlxcore/pearlxcore.env` updated with SQL Server connection
 - [ ] Ubuntu server prepared with .NET and SQL Server
-- [ ] Application files transferred to `/var/www/pearlxcore-dev/`
+- [ ] Application files transferred to `/var/www/pearlxcore-dev/releases/<timestamp>/`
 - [ ] SystemD service created and running
 - [ ] Nginx configured as reverse proxy
 - [ ] SSL certificate obtained and configured

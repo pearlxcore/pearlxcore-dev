@@ -1,5 +1,4 @@
-﻿using pearlxcore.dev.Models;
-using pearlxcore.dev.Models.Entities;
+using pearlxcore.dev.Models;
 using pearlxcore.dev.Models.Entities;
 
 namespace pearlxcore.dev.Services.Interfaces;
@@ -38,5 +37,4 @@ public interface IPostService
     
     // Related Posts
     Task<IEnumerable<Post>> GetRelatedPostsAsync(int postId, int limit = 3);
-
 }

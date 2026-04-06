@@ -45,45 +45,6 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <div class="newsletter-section">
-                <div class="newsletter-signup">
-                    <div class="newsletter-header">
-                        <h4 class="newsletter-title">Subscribe to updates</h4>
-                        <p class="newsletter-subtitle">Get the latest articles delivered to your inbox.</p>
-                    </div>
-                    
-                    @if (TempData["NewsletterSuccess"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            ✓ @TempData["NewsletterSuccess"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-                    @if (TempData["NewsletterError"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            ✗ @TempData["NewsletterError"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-                    
-                    <form asp-controller="Newsletter" asp-action="Subscribe" method="post" class="newsletter-form">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                        <div class="newsletter-input-group">
-                            <input type="email" 
-                                   name="email" 
-                                   class="newsletter-input" 
-                                   placeholder="your@email.com" 
-                                   required 
-                                   aria-label="Email address" />
-                            <button type="submit" class="newsletter-btn">Subscribe</button>
-                        </div>
-                        <p class="newsletter-disclaimer">No spam, just great content. Unsubscribe anytime.</p>
-                    </form>
-                </div>
-            </div>
-            
             <div class="footer-bottom">
                 <p class="footer-copyright">&copy; 2026 pearlxcore.dev. All rights reserved.</p>
             </div>
@@ -91,6 +52,7 @@
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/markdown-highlighter.js" asp-append-version="true"></script>
     <script>
         // Reading progress bar
         let lastScrollTop = 0;

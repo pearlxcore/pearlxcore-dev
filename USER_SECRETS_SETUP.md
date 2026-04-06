@@ -52,7 +52,17 @@ Example:
 dotnet user-secrets set "AdminUser:Password" "MySecurePass123"
 ```
 
-### 4. Verify Secrets Are Set
+### 4. Set the Local Database Connection String
+
+If you want to run the app locally, store your development connection string as a user secret too:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Database=LighthouseDb;Trusted_Connection=True;TrustServerCertificate=True"
+```
+
+If your local SQL Server uses SQL authentication instead of Windows auth, use that connection string here instead.
+
+### 5. Verify Secrets Are Set
 
 List all stored secrets:
 
@@ -64,9 +74,10 @@ Example output:
 ```
 AdminUser:Email = admin@pearlxcore.dev
 AdminUser:Password = MySecurePass123
+ConnectionStrings:DefaultConnection = Server=localhost;Database=LighthouseDb;Trusted_Connection=True;TrustServerCertificate=True
 ```
 
-### 5. Run the Application
+### 6. Run the Application
 
 ```powershell
 dotnet run
@@ -79,6 +90,11 @@ The admin user will be automatically created/updated with the credentials from u
 ## Production Deployment
 
 In production, use **environment variables** instead of user-secrets:
+
+### Database Connection String
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Server=127.0.0.1,1433;Database=pearlxcoreDevDb;User Id=sa;Password=YourSecurePassword123!;Encrypt=False;TrustServerCertificate=True;Connection Timeout=30"
+```
 
 ### Windows Server / IIS:
 ```powershell
@@ -116,6 +132,7 @@ environment:
 - You can have different credentials per environment by using different secret stores
 - To clear all secrets: `dotnet user-secrets clear`
 - To remove a specific secret: `dotnet user-secrets remove "AdminUser:Email"`
+- To remove the local DB string: `dotnet user-secrets remove "ConnectionStrings:DefaultConnection"`
 
 ---
 

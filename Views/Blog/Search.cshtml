@@ -31,14 +31,18 @@
 
     @if (Model.TotalCount == 0)
     {
-        <div class="alert alert-info text-center py-5">
+        <div class="search-empty-state">
             @if (string.IsNullOrWhiteSpace(searchQuery))
             {
-                <p class="mb-0">Enter a search term to find posts.</p>
+                <div class="empty-state__icon">🔎</div>
+                <h2 class="empty-state__title">Search the archive</h2>
+                <p class="empty-state__text mb-0">Enter a search term to find posts.</p>
             }
             else
             {
-                <p class="mb-0">No posts found matching <strong>"@searchQuery"</strong>.</p>
+                <div class="empty-state__icon">🔎</div>
+                <h2 class="empty-state__title">No results found</h2>
+                <p class="empty-state__text mb-0">No posts found matching <strong>"@searchQuery"</strong>.</p>
                 <p class="mt-2 mb-0"><a asp-controller="Blog" asp-action="Index">View all posts</a></p>
             }
         </div>

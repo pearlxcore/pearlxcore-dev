@@ -12,7 +12,7 @@
 
 <article class="article-body">
     <div class="article-back">
-        <a asp-controller="Blog" asp-action="Index" class="article-back__link">← Back to Articles</a>
+        <a asp-controller="Blog" asp-action="Index" class="article-back__link btn-back-cancel">← Back to Articles</a>
     </div>
 
     <h1 class="article-title">@Model.Title</h1>
@@ -44,44 +44,6 @@
         </div>
     </div>
 
-    @* 🔹 Categories *@
-    @if (Model.PostCategories.Any())
-    {
-        <div class="post-taxonomy">
-            <strong>Categories</strong>
-            <div class="post-taxonomy__chips">
-                @foreach (var c in Model.PostCategories.Select(pc => pc.Category))
-                {
-                    <a asp-controller="Blog"
-                       asp-action="Category"
-                       asp-route-slug="@c.Slug"
-                       class="badge bg-secondary">
-                        @c.Name
-                    </a>
-                }
-            </div>
-        </div>
-    }
-
-    @* 🔹 Tags *@
-    @if (Model.PostTags.Any())
-    {
-        <div class="post-taxonomy">
-            <strong>Tags</strong>
-            <div class="post-taxonomy__chips">
-                @foreach (var t in Model.PostTags.Select(pt => pt.Tag))
-                {
-                    <a asp-controller="Blog"
-                       asp-action="Tag"
-                       asp-route-slug="@t.Slug"
-                       class="badge bg-info text-dark">
-                        @t.Name
-                    </a>
-                }
-            </div>
-        </div>
-    }
-
     <hr class="article-divider" />
     @if (readingTime > 5)
     {
@@ -97,35 +59,47 @@
         @Html.Raw(Model.RenderedContent ?? Model.Content)
     </div>
 
-    @* Social Share Buttons *@
-    <div class="social-share">
-        <span class="social-share__label">Share:</span>
-        <div class="social-share__buttons">
-            <a href="https://twitter.com/intent/tweet?text=@Uri.EscapeDataString(Model.Title)&url=@Uri.EscapeDataString(Url.Action("Post", "Blog", new { slug = Model.Slug }, Context.Request.Scheme)!)" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="social-share__button social-share__button--twitter"
-               title="Share on Twitter">
-                𝕏
-            </a>
-            <a href="https://www.linkedin.com/sharing/share-offsite/?url=@Uri.EscapeDataString(Url.Action("Post", "Blog", new { slug = Model.Slug }, Context.Request.Scheme)!)" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="social-share__button social-share__button--linkedin"
-               title="Share on LinkedIn">
-                in
-            </a>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=@Uri.EscapeDataString(Url.Action("Post", "Blog", new { slug = Model.Slug }, Context.Request.Scheme)!)" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="social-share__button social-share__button--facebook"
-               title="Share on Facebook">
-                f
-            </a>
-        </div>
-    </div>
+    @if (Model.PostCategories.Any() || Model.PostTags.Any())
+    {
+        <div class="article-taxonomy-card">
+            @if (Model.PostCategories.Any())
+            {
+                <div class="post-taxonomy">
+                    <strong>Categories</strong>
+                    <div class="post-taxonomy__chips">
+                        @foreach (var c in Model.PostCategories.Select(pc => pc.Category))
+                        {
+                            <a asp-controller="Blog"
+                               asp-action="Category"
+                               asp-route-slug="@c.Slug"
+                               class="badge bg-secondary">
+                                @c.Name
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
 
-    <!-- Author Card -->
+            @if (Model.PostTags.Any())
+            {
+                <div class="post-taxonomy">
+                    <strong>Tags</strong>
+                    <div class="post-taxonomy__chips">
+                        @foreach (var t in Model.PostTags.Select(pt => pt.Tag))
+                        {
+                            <a asp-controller="Blog"
+                               asp-action="Tag"
+                               asp-route-slug="@t.Slug"
+                               class="badge bg-info text-dark">
+                                @t.Name
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
     <div class="author-card">
         @if (adminProfile?.AvatarUrl != null)
         {
@@ -192,7 +166,7 @@
                         repo="pearlxcore/pearlxcore-dev"
                         issue-term="pathname"
                         label="comments"
-                        theme="github-light"
+                        theme="github-dark"
                         crossorigin="anonymous"
                         async>
                 </script>
