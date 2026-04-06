@@ -434,7 +434,7 @@ public class PostService : IPostService
 
     private string GetPostImageUploadPath()
     {
-        return Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "pearlxcore.uploads", "posts"));
+        return Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "..", "shared", "uploads", "posts"));
     }
 
     // Dashboard Statistics

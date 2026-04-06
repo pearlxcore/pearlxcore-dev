@@ -5,18 +5,20 @@ param(
     [string]$Server = "192.168.50.146",
     [string]$User = "pearlxcore",
     [string]$RemoteRoot = "/var/www/pearlxcore.dev",
-    [string]$PublishDir = (Join-Path $PSScriptRoot ".artifacts\publish")
+    [string]$PublishDir = (Join-Path $PSScriptRoot ".artifacts\publish"),
+    [string]$SudoPassword = ""
 )
 
 $ReleaseName = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
 $RemoteReleasesRoot = "$RemoteRoot/releases"
 $RemoteSharedRoot = "$RemoteRoot/shared"
+$RemoteUploadsRoot = "$RemoteSharedRoot/uploads"
 $RemoteReleaseDir = "$RemoteReleasesRoot/$ReleaseName"
 $RemoteLiveLink = "$RemoteRoot/publish"
 $RemoteLegacyDir = "$RemoteReleasesRoot/legacy-$ReleaseName"
-$RemotePostsDir = "$RemoteSharedRoot/wwwroot/images/posts"
-$RemoteAvatarsDir = "$RemoteSharedRoot/wwwroot/images/avatars"
-$RemoteCvDir = "$RemoteSharedRoot/wwwroot/files/cv"
+$RemotePostsDir = "$RemoteUploadsRoot/posts"
+$RemoteAvatarsDir = "$RemoteUploadsRoot/avatars"
+$RemoteCvDir = "$RemoteUploadsRoot/cv"
 
 Write-Host "Starting deployment to $Server..." -ForegroundColor Cyan
 
@@ -34,6 +36,15 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Build completed successfully" -ForegroundColor Green
 
+# Clean out nested publish artifacts copied from the repository tree itself.
+if (Test-Path -LiteralPath (Join-Path $PublishDir 'publish')) {
+    Remove-Item -LiteralPath (Join-Path $PublishDir 'publish') -Recurse -Force
+}
+
+if (Test-Path -LiteralPath (Join-Path $PublishDir 'published')) {
+    Remove-Item -LiteralPath (Join-Path $PublishDir 'published') -Recurse -Force
+}
+
 # Step 2: Inspect existing live target
 Write-Host "`n[2/6] Inspecting existing live release..." -ForegroundColor Yellow
 $PreviousLiveTarget = ssh "$User@$Server" "if [ -L '$RemoteLiveLink' ]; then readlink -f '$RemoteLiveLink'; fi" | Select-Object -First 1
@@ -47,7 +58,7 @@ Write-Host ("Previous live target: " + ($(if ($PreviousLiveTarget) { $PreviousLi
 
 # Step 3: Prepare remote directories
 Write-Host "`n[3/6] Preparing remote release directories..." -ForegroundColor Yellow
-ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+ssh "$User@$Server" "mkdir -p '$RemoteReleasesRoot' '$RemoteUploadsRoot' '$RemotePostsDir' '$RemoteAvatarsDir' '$RemoteCvDir' && chmod -R a+rwX '$RemoteUploadsRoot'"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Remote directory preparation failed!" -ForegroundColor Red
@@ -78,6 +89,16 @@ Write-Host "`n[5/6] Switching live release atomically..." -ForegroundColor Yello
 ssh "$User@$Server" @"
 set -e
 mkdir -p '$RemoteReleaseDir/wwwroot/images' '$RemoteReleaseDir/wwwroot/files'
+if [ -d '$RemoteReleaseDir/wwwroot/images/posts' ]; then
+    cp -a '$RemoteReleaseDir/wwwroot/images/posts/.' '$RemotePostsDir/' 2>/dev/null || true
+fi
+if [ -d '$RemoteReleaseDir/wwwroot/images/avatars' ]; then
+    cp -a '$RemoteReleaseDir/wwwroot/images/avatars/.' '$RemoteAvatarsDir/' 2>/dev/null || true
+fi
+if [ -d '$RemoteReleaseDir/wwwroot/files/cv' ]; then
+    cp -a '$RemoteReleaseDir/wwwroot/files/cv/.' '$RemoteCvDir/' 2>/dev/null || true
+fi
+rm -rf '$RemoteReleaseDir/wwwroot/images/posts' '$RemoteReleaseDir/wwwroot/images/avatars' '$RemoteReleaseDir/wwwroot/files/cv'
 ln -sfnT '$RemotePostsDir' '$RemoteReleaseDir/wwwroot/images/posts'
 ln -sfnT '$RemoteAvatarsDir' '$RemoteReleaseDir/wwwroot/images/avatars'
 ln -sfnT '$RemoteCvDir' '$RemoteReleaseDir/wwwroot/files/cv'
@@ -91,7 +112,12 @@ if ($LASTEXITCODE -ne 0) {
 
 # Step 6: Restart service and verify health.
 Write-Host "`n[6/6] Restarting service and running health check..." -ForegroundColor Yellow
-ssh "$User@$Server" "sudo systemctl restart pearlxcore"
+if ([string]::IsNullOrWhiteSpace($SudoPassword)) {
+    ssh "$User@$Server" "sudo systemctl restart pearlxcore"
+}
+else {
+    ssh "$User@$Server" "printf '%s\n' '$SudoPassword' | sudo -S -p '' systemctl restart pearlxcore"
+}
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Service restart failed!" -ForegroundColor Red
@@ -115,10 +141,20 @@ if (-not $HealthCheckPassed) {
     Write-Host "Health check failed, attempting rollback..." -ForegroundColor Red
 
     if ($PreviousLiveTarget) {
-        ssh "$User@$Server" "ln -sfnT '$PreviousLiveTarget' '$RemoteLiveLink' && sudo systemctl restart pearlxcore"
+        if ([string]::IsNullOrWhiteSpace($SudoPassword)) {
+            ssh "$User@$Server" "ln -sfnT '$PreviousLiveTarget' '$RemoteLiveLink' && sudo systemctl restart pearlxcore"
+        }
+        else {
+            ssh "$User@$Server" "ln -sfnT '$PreviousLiveTarget' '$RemoteLiveLink' && printf '%s\n' '$SudoPassword' | sudo -S -p '' systemctl restart pearlxcore"
+        }
     }
     else {
-        ssh "$User@$Server" "rm -f '$RemoteLiveLink' && mv '$RemoteLegacyDir' '$RemoteLiveLink' && sudo systemctl restart pearlxcore"
+        if ([string]::IsNullOrWhiteSpace($SudoPassword)) {
+            ssh "$User@$Server" "rm -f '$RemoteLiveLink' && mv '$RemoteLegacyDir' '$RemoteLiveLink' && sudo systemctl restart pearlxcore"
+        }
+        else {
+            ssh "$User@$Server" "rm -f '$RemoteLiveLink' && mv '$RemoteLegacyDir' '$RemoteLiveLink' && printf '%s\n' '$SudoPassword' | sudo -S -p '' systemctl restart pearlxcore"
+        }
     }
 
     exit 1

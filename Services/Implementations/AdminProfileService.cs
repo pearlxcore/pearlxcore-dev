@@ -88,7 +88,7 @@ public class AdminProfileService : IAdminProfileService
             return null;
         }
 
-        var uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "images", "avatars");
+        var uploadsDir = Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "..", "shared", "uploads", "avatars"));
         Directory.CreateDirectory(uploadsDir);
 
         var fileName = $"{Guid.NewGuid()}{ext}";
@@ -127,7 +127,7 @@ public class AdminProfileService : IAdminProfileService
             return null;
         }
 
-        var uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "files", "cv");
+        var uploadsDir = Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "..", "shared", "uploads", "cv"));
         Directory.CreateDirectory(uploadsDir);
 
         var fileName = $"resume_{Guid.NewGuid()}{ext}";

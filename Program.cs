@@ -117,19 +117,27 @@ namespace pearlxcore.dev
                 app.UseForwardedHeaders();
                 app.UseHttpsRedirection();
 
-                // Serve uploaded post images from a folder outside the watched project tree
-                // so dotnet watch does not restart after every successful upload.
-                var postImagesPath = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "pearlxcore.uploads", "posts"));
+                // Serve uploaded files from a shared folder outside the release tree
+                // so the running service can write them without touching the deployment root.
+                var sharedUploadsRoot = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "..", "shared", "uploads"));
+                var postImagesPath = Path.Combine(sharedUploadsRoot, "posts");
                 Directory.CreateDirectory(postImagesPath);
 
                 var legacyPostImagesPath = Path.Combine(app.Environment.WebRootPath, "images", "posts");
-                Directory.CreateDirectory(legacyPostImagesPath);
+
+                var postImageProviders = new List<IFileProvider>
+                {
+                    new PhysicalFileProvider(postImagesPath)
+                };
+
+                if (Directory.Exists(legacyPostImagesPath))
+                {
+                    postImageProviders.Add(new PhysicalFileProvider(legacyPostImagesPath));
+                }
 
                 app.UseStaticFiles(new StaticFileOptions
                 {
-                    FileProvider = new CompositeFileProvider(
-                        new PhysicalFileProvider(postImagesPath),
-                        new PhysicalFileProvider(legacyPostImagesPath)),
+                    FileProvider = new CompositeFileProvider(postImageProviders),
                     RequestPath = "/images/posts"
                 });
 

@@ -53,7 +53,7 @@ public class DashboardController : AdminController
         // Calculate image storage
         var imagesPaths = new[]
         {
-            Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "pearlxcore.uploads", "posts")),
+            Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "..", "shared", "uploads", "posts")),
             Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts")
         };
 

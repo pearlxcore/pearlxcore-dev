@@ -90,7 +90,7 @@ public class MediaService : IMediaService
     {
         return
         [
-            Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "pearlxcore.uploads", "posts")),
+            Path.GetFullPath(Path.Combine(_webHostEnvironment.ContentRootPath, "..", "..", "shared", "uploads", "posts")),
             Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts")
         ];
     }
