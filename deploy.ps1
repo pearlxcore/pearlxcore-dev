@@ -28,7 +28,7 @@ if (Test-Path -LiteralPath $PublishDir) {
 
 # Step 1: Build Release version
 Write-Host "`n[1/6] Building Release version into $PublishDir..." -ForegroundColor Yellow
-dotnet publish -c Release -o $PublishDir
+dotnet publish -c Release -r linux-x64 --self-contained false -o $PublishDir
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red
