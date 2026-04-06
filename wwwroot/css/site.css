@@ -4146,6 +4146,58 @@ textarea.form-control:focus {
   color: inherit;
 }
 
+/* ========== ERROR PAGES ========== */
+.error-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 64px);
+  padding: var(--space-l) var(--space-m);
+}
+
+.error-container {
+  text-align: center;
+}
+
+.error-content {
+  max-width: 500px;
+  text-align: center;
+}
+
+.error-title {
+  font-size: clamp(4rem, 10vw, 6rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: #f8fafc;
+  margin-bottom: var(--space-sm);
+}
+
+.error-heading {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: var(--space-m);
+}
+
+.error-message {
+  font-size: var(--text-base);
+  color: #cbd5e1;
+  line-height: 1.7;
+  margin-bottom: var(--space-xl);
+}
+
+.error-actions {
+  display: flex;
+  gap: var(--space-m);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-actions .btn {
+  min-width: 120px;
+}
+
 .article-divider {
   border-top-color: rgba(148, 163, 184, 0.16);
 }
