@@ -84,6 +84,13 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Upload completed successfully" -ForegroundColor Green
 
+ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir'"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to set release permissions!" -ForegroundColor Red
+    exit 1
+}
+
 # Step 5: Wire persistent shared assets into the release, then switch the live symlink.
 Write-Host "`n[5/6] Switching live release atomically..." -ForegroundColor Yellow
 ssh "$User@$Server" @"
@@ -103,6 +110,7 @@ ln -sfnT '$RemotePostsDir' '$RemoteReleaseDir/wwwroot/images/posts'
 ln -sfnT '$RemoteAvatarsDir' '$RemoteReleaseDir/wwwroot/images/avatars'
 ln -sfnT '$RemoteCvDir' '$RemoteReleaseDir/wwwroot/files/cv'
 ln -sfnT '$RemoteReleaseDir' '$RemoteLiveLink'
+chmod -R a+rX '$RemoteReleaseDir'
 "@
 
 if ($LASTEXITCODE -ne 0) {
