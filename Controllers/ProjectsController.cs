@@ -1,5 +1,6 @@
 using pearlxcore.dev.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using pearlxcore.dev.Infrastructure;
 
 namespace pearlxcore.dev.Controllers;
 
@@ -19,5 +20,22 @@ public class ProjectsController : Controller
         ViewData["Title"] = "Projects";
         ViewData["MetaDescription"] = "Archived and active open source projects covering desktop apps, PS4/PS5 community tools, mobile tooling, and automation.";
         return View(projects);
+    }
+
+    [HttpGet("/Projects/{id:int}")]
+    public async Task<IActionResult> Details(int id)
+    {
+        var project = await _projectService.GetByIdAsync(id);
+        if (project == null)
+        {
+            return NotFound();
+        }
+
+        ViewData["Title"] = project.Title;
+        ViewData["MetaDescription"] = !string.IsNullOrWhiteSpace(project.Description)
+            ? ProjectPresentationHelper.GetExcerpt(project.Description, 160)
+            : $"Project details for {project.Title}.";
+        ViewBag.RenderedDescription = ProjectPresentationHelper.RenderMarkdown(project.Description);
+        return View(project);
     }
 }

@@ -10,6 +10,7 @@ using Ganss.Xss;
 using System.IO;
 using System.Linq;
 using Serilog;
+using pearlxcore.dev.Infrastructure;
 
 namespace pearlxcore.dev.Areas.Admin.Controllers;
 
@@ -213,7 +214,7 @@ public class PostsController : AdminController
             .UseAdvancedExtensions()
             .Build();
 
-        var rawHtml = Markdown.ToHtml(request.Markdown, pipeline);
+        var rawHtml = Markdown.ToHtml(MarkdownMermaidHelper.PrepareMarkdown(request.Markdown), pipeline);
         
         // Sanitize the HTML to prevent XSS attacks in preview
         var sanitizer = new HtmlSanitizer();
@@ -228,7 +229,7 @@ public class PostsController : AdminController
         sanitizer.AllowedAttributes.Add("src");
         sanitizer.AllowedAttributes.Add("alt");
         
-        var sanitizedHtml = sanitizer.Sanitize(rawHtml);
+        var sanitizedHtml = MarkdownMermaidHelper.NormalizeMermaidBlocks(sanitizer.Sanitize(rawHtml));
 
         return Json(new { html = sanitizedHtml });
     }

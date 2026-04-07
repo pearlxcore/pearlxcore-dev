@@ -15,6 +15,10 @@ public class Project
     public string ProjectType { get; set; } = string.Empty;
 
     [Required]
+    [MaxLength(100)]
+    public string Platform { get; set; } = string.Empty;
+
+    [Required]
     [MaxLength(40)]
     public string Status { get; set; } = "Archived";
 

@@ -94,8 +94,8 @@ public class ProjectService : IProjectService
 
         existing.Title = project.Title;
         existing.ProjectType = project.ProjectType;
+        existing.Platform = project.Platform;
         existing.Status = project.Status;
-        existing.Summary = project.Summary;
         existing.Description = project.Description;
         existing.GitHubUrl = project.GitHubUrl;
         existing.DownloadUrl = project.DownloadUrl;

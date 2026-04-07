@@ -14,8 +14,10 @@
 
     <div class="card admin-surface-card">
         <div class="card-body">
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <div class="row g-3">
                     <div class="col-md-8">
@@ -34,29 +36,24 @@
                         <span asp-validation-for="ProjectType" class="text-danger"></span>
                     </div>
                     <div class="col-md-6">
+                        <label asp-for="Platform" class="form-label admin-form-label">Platform</label>
+                        <select asp-for="Platform" asp-items="ViewBag.ProjectPlatformOptions" class="form-select"></select>
+                        <span asp-validation-for="Platform" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
                         <label asp-for="Status" class="form-label admin-form-label">Status</label>
                         <select asp-for="Status" asp-items="ViewBag.ProjectStatusOptions" class="form-select"></select>
                         <span asp-validation-for="Status" class="text-danger"></span>
                     </div>
                     <div class="col-12">
-                        <label asp-for="Summary" class="form-label admin-form-label">Summary</label>
-                        <textarea asp-for="Summary" class="form-control" rows="3" placeholder="Short summary shown on the card"></textarea>
-                        <span asp-validation-for="Summary" class="text-danger"></span>
-                    </div>
-                    <div class="col-12">
                         <label asp-for="Description" class="form-label admin-form-label">Description</label>
-                        <textarea asp-for="Description" class="form-control" rows="5" placeholder="Optional extra details"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
+                        <textarea asp-for="Description" class="form-control project-markdown-editor" placeholder="Write the project description here..."></textarea>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="GitHubUrl" class="form-label admin-form-label">GitHub Repo URL</label>
                         <input asp-for="GitHubUrl" class="form-control" placeholder="https://github.com/..." />
                         <span asp-validation-for="GitHubUrl" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="DownloadUrl" class="form-label admin-form-label">Download / Release URL</label>
-                        <input asp-for="DownloadUrl" class="form-control" placeholder="https://github.com/.../releases/latest" />
-                        <span asp-validation-for="DownloadUrl" class="text-danger"></span>
                     </div>
                     <div class="col-12">
                         <label asp-for="ScreenshotFile" class="form-label admin-form-label">Screenshot Image</label>
@@ -80,4 +77,16 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script src="~/js/editor.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.querySelector('#Description')) {
+                new MarkdownEditor({
+                    apiEndpoint: '/Admin/Posts/UploadImage',
+                    previewEndpoint: '/Admin/Posts/PreviewMarkdown',
+                    contentSelector: '#Description'
+                });
+            }
+        });
+    </script>
 }

@@ -83,8 +83,8 @@ public class PostService : IPostService
 
         post.Slug = await EnsureUniqueSlugAsync(baseSlug);
 
-        var rawHtml = Markdown.ToHtml(post.Content, _markdownPipeline);
-        post.RenderedContent = _htmlSanitizer.Sanitize(rawHtml);
+        var rawHtml = Markdown.ToHtml(pearlxcore.dev.Infrastructure.MarkdownMermaidHelper.PrepareMarkdown(post.Content), _markdownPipeline);
+        post.RenderedContent = pearlxcore.dev.Infrastructure.MarkdownMermaidHelper.NormalizeMermaidBlocks(_htmlSanitizer.Sanitize(rawHtml));
         
         Log.Debug("Rendered and sanitized post content for: {Title}", post.Title);
 
@@ -105,8 +105,8 @@ public class PostService : IPostService
         var baseSlug = NormalizeSlug(post.Slug);
         post.Slug = await EnsureUniqueSlugAsync(baseSlug, post.Id);
 
-        var rawHtml = Markdown.ToHtml(post.Content, _markdownPipeline);
-        post.RenderedContent = _htmlSanitizer.Sanitize(rawHtml);
+        var rawHtml = Markdown.ToHtml(pearlxcore.dev.Infrastructure.MarkdownMermaidHelper.PrepareMarkdown(post.Content), _markdownPipeline);
+        post.RenderedContent = pearlxcore.dev.Infrastructure.MarkdownMermaidHelper.NormalizeMermaidBlocks(_htmlSanitizer.Sanitize(rawHtml));
         post.UpdatedAt = DateTime.UtcNow;
         
         Log.Debug("Rendered and sanitized updated post content for: {Title}", post.Title);

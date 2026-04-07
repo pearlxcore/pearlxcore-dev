@@ -54,6 +54,7 @@ class MarkdownEditor {
                 <button class="toolbar-btn" data-action="heading2" title="Heading 2" type="button">## H2</button>
                 <button class="toolbar-btn" data-action="link" title="Link" type="button">Link</button>
                 <button class="toolbar-btn" data-action="codeblock" title="Code Block" type="button">Code Block</button>
+                <button class="toolbar-btn" data-action="mermaid" title="Mermaid Diagram" type="button">Mermaid</button>
                 <button class="toolbar-btn" data-action="uploadImage" title="Upload Image" type="button">Upload Image</button>
                 <button class="toolbar-btn" data-action="quote" title="Quote" type="button">"</button>
                 <button class="toolbar-btn" data-action="list" title="Bulleted List" type="button">- List</button>
@@ -175,6 +176,8 @@ class MarkdownEditor {
                 return this.wrapSelection(textarea, start, end, '[', '](url)', 'text');
             case 'codeblock':
                 return this.insertCodeBlock(textarea, start, end, prompt('Code language (csharp, python, bash, or leave blank)', '') || '');
+            case 'mermaid':
+                return this.insertMermaidBlock(textarea, start, end);
             case 'quote':
                 return this.prefixCurrentLines(textarea, start, end, '> ', 'Quote');
             case 'list':
@@ -268,6 +271,21 @@ class MarkdownEditor {
         const replacement = `${openingFence}${selected}\n\`\`\``;
         const cursorStart = start + openingFence.length;
         const cursorEnd = cursorStart + selected.length;
+        this.replaceSelection(textarea, start, end, replacement, cursorStart, cursorEnd);
+        this.updatePreview();
+    }
+
+    insertMermaidBlock(textarea, start, end) {
+        const selected = textarea.value.substring(start, end).trim();
+        const template = selected || [
+            'flowchart TD',
+            '    A[Start App] --> B[Next Step]',
+            '    B --> C[Finish]'
+        ].join('\n');
+
+        const replacement = `\`\`\`mermaid\n${template}\n\`\`\``;
+        const cursorStart = start + '```mermaid\n'.length;
+        const cursorEnd = cursorStart + template.length;
         this.replaceSelection(textarea, start, end, replacement, cursorStart, cursorEnd);
         this.updatePreview();
     }
@@ -506,9 +524,11 @@ class MarkdownEditor {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new MarkdownEditor({
-        contentSelector: '#Content',
-        apiEndpoint: '/Admin/Posts/UploadImage',
-        previewEndpoint: '/Admin/Posts/PreviewMarkdown'
-    });
+    if (document.querySelector('#Content')) {
+        new MarkdownEditor({
+            contentSelector: '#Content',
+            apiEndpoint: '/Admin/Posts/UploadImage',
+            previewEndpoint: '/Admin/Posts/PreviewMarkdown'
+        });
+    }
 });

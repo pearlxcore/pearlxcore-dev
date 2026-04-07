@@ -1,4 +1,5 @@
 using pearlxcore.dev.Models.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace pearlxcore.dev.Services.Interfaces;
 

@@ -10,6 +10,20 @@
 
     const wrap = (text, className) => `<span class="${className}">${text}</span>`;
 
+    const initializeMermaid = () => {
+        if (!window.mermaid || window.__pearlxMermaidInitialized) {
+            return false;
+        }
+
+        window.mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            securityLevel: 'strict'
+        });
+        window.__pearlxMermaidInitialized = true;
+        return true;
+    };
+
     const highlightCSharp = (input) => {
         let html = escapeHtml(input);
         html = html.replace(/(&quot;(?:\\.|[^&"])*&quot;|&#39;(?:\\.|[^&#'])*&#39;)/g, (match) => wrap(match, 'code-token code-token--string'));
@@ -53,6 +67,39 @@
         zsh: highlightBash
     };
 
+    const mermaidNodeLabelRegex = /(\b[A-Za-z_][A-Za-z0-9_]*)([\[\(\{])([^\[\]\(\)\{\}]*)?([\]\)\}])/g;
+
+    const normalizeMermaidLine = (line) => {
+        if (!line || !line.trim()) {
+            return line;
+        }
+
+        return line.replace(mermaidNodeLabelRegex, (match, id, open, label, close) => {
+            const trimmed = (label || '').trim();
+            if (!trimmed) {
+                return match;
+            }
+
+            if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                return match;
+            }
+
+            return `${id}${open}"${trimmed}"${close}`;
+        });
+    };
+
+    const normalizeMermaidText = (input) => {
+        if (!input) {
+            return input;
+        }
+
+        return input
+            .replace(/\r\n/g, '\n')
+            .split('\n')
+            .map(normalizeMermaidLine)
+            .join('\n');
+    };
+
     const normalizeLanguage = (codeEl) => {
         const className = Array.from(codeEl.classList).find(cls => cls.startsWith('language-'));
         return className ? className.replace('language-', '').toLowerCase() : '';
@@ -84,6 +131,35 @@
         }
 
         root.querySelectorAll('pre > code').forEach(highlightCodeBlock);
+        if (window.mermaid) {
+            initializeMermaid();
+            renderMermaid(root);
+        }
+    };
+
+    const renderMermaid = async (root) => {
+        if (!root || !window.mermaid) {
+            return;
+        }
+
+        const diagrams = root.querySelectorAll('.mermaid');
+        if (!diagrams.length) {
+            return;
+        }
+
+        diagrams.forEach((diagram) => {
+            diagram.textContent = normalizeMermaidText(diagram.textContent || '');
+        });
+
+        try {
+            if (typeof window.mermaid.run === 'function') {
+                await window.mermaid.run({ nodes: Array.from(diagrams) });
+            } else if (typeof window.mermaid.init === 'function') {
+                window.mermaid.init(undefined, diagrams);
+            }
+        } catch (error) {
+            console.error('Mermaid render failed', error);
+        }
     };
 
     const api = {
@@ -96,5 +172,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         highlightRoot(document.querySelector('.article-body'));
         highlightRoot(document.querySelector('.preview-content'));
+        highlightRoot(document.querySelector('.project-detail__content'));
     });
 })();

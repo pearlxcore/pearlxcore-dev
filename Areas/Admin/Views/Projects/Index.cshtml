@@ -1,4 +1,5 @@
 @model IEnumerable<pearlxcore.dev.Models.Entities.Project>
+@using pearlxcore.dev.Infrastructure
 @{
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Projects";
@@ -28,17 +29,20 @@
         <div class="row">
             @foreach (var project in projects)
             {
-                <div class="col-lg-6 mb-4">
+                <div class="col-12 col-xxl-6 mb-4">
                     <div class="card admin-surface-card h-100 project-admin-card">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start gap-3">
-                                <div>
-                                    <div class="project-admin-card__badges mb-2">
-                                        <span class="badge project-admin-card__badge">@project.ProjectType</span>
-                                        <span class="badge project-admin-card__badge project-admin-card__badge--status">@project.Status</span>
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                <div class="project-admin-card__header">
+                                    <div class="project-admin-card__taxonomy">
+                                        <div class="post-taxonomy__chips">
+                                            <span class="badge project-admin-card__badge project-admin-card__badge--platform">@project.Platform</span>
+                                            <span class="badge project-admin-card__badge">@project.ProjectType</span>
+                                            <span class="badge project-admin-card__badge project-admin-card__badge--status">@project.Status</span>
+                                        </div>
                                     </div>
                                     <h5 class="card-title admin-surface-card__title mb-1">@project.Title</h5>
-                                    <p class="card-text admin-surface-card__meta small mb-2">Sort order: @project.SortOrder</p>
+                                    <p class="card-text admin-surface-card__meta small mb-0">Sort order: @project.SortOrder</p>
                                 </div>
                                 <div class="d-flex flex-column gap-2 align-items-end">
                                     <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-sm btn-back-cancel">Edit</a>
@@ -49,28 +53,41 @@
                                 </div>
                             </div>
 
-                            @if (!string.IsNullOrWhiteSpace(project.Summary))
-                            {
-                                <p class="admin-surface-card__text mb-3">@project.Summary</p>
-                            }
-
                             @if (!string.IsNullOrWhiteSpace(project.Description))
                             {
-                                <p class="admin-surface-card__meta small mb-3">@project.Description</p>
+                                <p class="admin-surface-card__text project-admin-card__excerpt mb-3">@ProjectPresentationHelper.GetExcerpt(project.Description, 200)</p>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
+                            {
+                                <a href="@project.ScreenshotUrl" target="_blank" rel="noopener noreferrer" class="project-admin-card__preview mb-3">
+                                    <img src="@project.ScreenshotUrl" alt="@project.Title screenshot" />
+                                </a>
+                            }
+
+                            @{
+                                var latestReleaseUrl = ProjectPresentationHelper.GetLatestReleaseUrl(project.GitHubUrl);
+                                var downloadBadgeUrl = ProjectPresentationHelper.GetDownloadBadgeUrl(project.GitHubUrl);
                             }
 
                             <div class="project-admin-card__links">
                                 @if (!string.IsNullOrWhiteSpace(project.GitHubUrl))
                                 {
-                                    <a href="@project.GitHubUrl" target="_blank" rel="noopener noreferrer">GitHub</a>
+                                    <a href="@project.GitHubUrl" class="btn btn-back-cancel btn-sm project-admin-card__link" target="_blank" rel="noopener noreferrer">GitHub</a>
                                 }
-                                @if (!string.IsNullOrWhiteSpace(project.DownloadUrl))
+                                @if (!string.IsNullOrWhiteSpace(latestReleaseUrl))
                                 {
-                                    <a href="@project.DownloadUrl" target="_blank" rel="noopener noreferrer">Download</a>
+                                    <a href="@latestReleaseUrl" class="btn btn-back-cancel btn-sm project-admin-card__link" target="_blank" rel="noopener noreferrer">Download</a>
+                                    @if (!string.IsNullOrWhiteSpace(downloadBadgeUrl))
+                                    {
+                                        <a href="@latestReleaseUrl" class="project-admin-card__badge-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub downloads badge">
+                                            <img src="@downloadBadgeUrl" alt="GitHub All Releases" class="project-admin-card__badge-image" />
+                                        </a>
+                                    }
                                 }
                                 @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
                                 {
-                                    <a href="@project.ScreenshotUrl" target="_blank" rel="noopener noreferrer">Screenshot</a>
+                                    <a href="@project.ScreenshotUrl" class="btn btn-back-cancel btn-sm project-admin-card__link" target="_blank" rel="noopener noreferrer">Screenshot</a>
                                 }
                             </div>
                         </div>

@@ -1,0 +1,70 @@
+@model pearlxcore.dev.Models.Entities.Project
+@using pearlxcore.dev.Infrastructure
+@{
+    var latestReleaseUrl = ProjectPresentationHelper.GetLatestReleaseUrl(Model.GitHubUrl);
+    var downloadBadgeUrl = ProjectPresentationHelper.GetDownloadBadgeUrl(Model.GitHubUrl);
+    var renderedDescription = ViewBag.RenderedDescription as string ?? ProjectPresentationHelper.RenderMarkdown(Model.Description);
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="project-detail">
+    <div class="project-detail__hero">
+        <div class="project-detail__meta">
+            <span class="project-card__badge project-card__badge--platform">@Model.Platform</span>
+            <span class="project-card__badge project-card__badge--type">@Model.ProjectType</span>
+            <span class="project-card__badge @GetStatusBadgeClass(Model.Status)">@Model.Status</span>
+        </div>
+
+        <h1 class="project-detail__title">@Model.Title</h1>
+
+        <div class="project-detail__actions">
+            @if (!string.IsNullOrWhiteSpace(Model.GitHubUrl))
+            {
+                <a href="@Model.GitHubUrl" class="btn btn-back-cancel" target="_blank" rel="noopener noreferrer">GitHub</a>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(latestReleaseUrl))
+            {
+                <div class="project-card__download-group">
+                    <a href="@latestReleaseUrl" class="btn btn-back-cancel" target="_blank" rel="noopener noreferrer">Download</a>
+                    @if (!string.IsNullOrWhiteSpace(downloadBadgeUrl))
+                    {
+                        <a href="@latestReleaseUrl" class="project-card__download-badge" target="_blank" rel="noopener noreferrer" aria-label="GitHub downloads badge">
+                            <img src="@downloadBadgeUrl" alt="GitHub All Releases" />
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ScreenshotUrl))
+    {
+        <figure class="project-detail__screenshot">
+            <img src="@Model.ScreenshotUrl" alt="@Model.Title screenshot" />
+        </figure>
+    }
+    else
+    {
+        <div class="project-detail__screenshot project-detail__screenshot--placeholder">
+            <span>@Model.Title</span>
+        </div>
+    }
+
+    <article class="project-detail__content article-content">
+        @Html.Raw(renderedDescription)
+    </article>
+</section>
+
+@functions {
+    private static string GetStatusBadgeClass(string? status)
+    {
+        return status?.ToLowerInvariant() switch
+        {
+            "active" => "project-card__badge--active",
+            "experimental" => "project-card__badge--experimental",
+            "inactive" => "project-card__badge--inactive",
+            _ => "project-card__badge--archived",
+        };
+    }
+}

@@ -15,11 +15,12 @@ public class ProjectFormViewModel
     public string ProjectType { get; set; } = string.Empty;
 
     [Required]
+    [StringLength(100)]
+    public string Platform { get; set; } = string.Empty;
+
+    [Required]
     [StringLength(40)]
     public string Status { get; set; } = "Archived";
-
-    [StringLength(500)]
-    public string? Summary { get; set; }
 
     [StringLength(2000)]
     public string? Description { get; set; }
@@ -27,10 +28,6 @@ public class ProjectFormViewModel
     [Url]
     [StringLength(300)]
     public string? GitHubUrl { get; set; }
-
-    [Url]
-    [StringLength(300)]
-    public string? DownloadUrl { get; set; }
 
     [Url]
     [StringLength(300)]

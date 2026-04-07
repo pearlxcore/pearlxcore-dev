@@ -177,6 +177,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasMaxLength(100)
                   .IsRequired();
 
+            entity.Property(p => p.Platform)
+                  .HasMaxLength(100)
+                  .IsRequired();
+
             entity.Property(p => p.Status)
                   .HasMaxLength(40)
                   .IsRequired();

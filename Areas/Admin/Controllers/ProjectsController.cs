@@ -12,14 +12,19 @@ public class ProjectsController : AdminController
 {
     private static readonly string[] ProjectTypes =
     [
-        "Desktop App",
         "PS2",
         "PS3",
         "PS4",
         "PS5",
-        "Mobile / Cellular",
-        "Automation",
         "Misc"
+    ];
+
+    private static readonly string[] ProjectPlatforms =
+    [
+        "Desktop",
+        "Web App",
+        "Mobile",
+        "Other"
     ];
 
     private static readonly string[] ProjectStatuses =
@@ -82,11 +87,10 @@ public class ProjectsController : AdminController
         {
             Title = model.Title,
             ProjectType = model.ProjectType,
+            Platform = model.Platform,
             Status = model.Status,
-            Summary = model.Summary,
             Description = model.Description,
             GitHubUrl = model.GitHubUrl,
-            DownloadUrl = model.DownloadUrl,
             ScreenshotUrl = finalScreenshotUrl,
             SortOrder = model.SortOrder
         };
@@ -115,11 +119,10 @@ public class ProjectsController : AdminController
             Id = project.Id,
             Title = project.Title,
             ProjectType = project.ProjectType,
+            Platform = project.Platform,
             Status = project.Status,
-            Summary = project.Summary,
             Description = project.Description,
             GitHubUrl = project.GitHubUrl,
-            DownloadUrl = project.DownloadUrl,
             ScreenshotUrl = project.ScreenshotUrl,
             SortOrder = project.SortOrder
         });
@@ -159,12 +162,11 @@ public class ProjectsController : AdminController
             Id = existing.Id,
             Title = model.Title,
             ProjectType = model.ProjectType,
+            Platform = model.Platform,
             Status = model.Status,
-            Summary = model.Summary,
             Description = model.Description,
             GitHubUrl = model.GitHubUrl,
-            DownloadUrl = model.DownloadUrl,
-            ScreenshotUrl = screenshotUrl ?? model.ScreenshotUrl,
+            ScreenshotUrl = screenshotUrl ?? existing.ScreenshotUrl,
             SortOrder = model.SortOrder,
             CreatedAt = existing.CreatedAt
         };
@@ -200,6 +202,7 @@ public class ProjectsController : AdminController
     private void PopulateOptions()
     {
         ViewBag.ProjectTypeOptions = ProjectTypes.Select(x => new SelectListItem(x, x)).ToList();
+        ViewBag.ProjectPlatformOptions = ProjectPlatforms.Select(x => new SelectListItem(x, x)).ToList();
         ViewBag.ProjectStatusOptions = ProjectStatuses.Select(x => new SelectListItem(x, x)).ToList();
     }
 
