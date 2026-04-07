@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
     const escapeHtml = (value) => {
         return String(value)
             .replace(/&/g, '&amp;')
@@ -112,7 +112,7 @@
         overlay.innerHTML = `
             <div class="mermaid-overlay__backdrop" data-mermaid-close></div>
             <div class="mermaid-overlay__dialog" role="dialog" aria-modal="true" aria-label="Mermaid diagram fullscreen view">
-                <button type="button" class="mermaid-overlay__close" data-mermaid-close aria-label="Close diagram">×</button>
+                <button type="button" class="mermaid-overlay__close" data-mermaid-close aria-label="Close diagram">X</button>
                 <div class="mermaid-overlay__content"></div>
             </div>
         `;
@@ -165,7 +165,9 @@
         overlay.classList.add('is-open');
         document.body.classList.add('mermaid-overlay-open');
 
-        overlay.focus();
+        requestAnimationFrame(() => {
+            overlay.focus();
+        });
     };
 
     const bindMermaidFullscreen = (diagram) => {
@@ -270,3 +272,5 @@
         }
     });
 })();
+
+

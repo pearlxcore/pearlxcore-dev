@@ -39,7 +39,7 @@
         </div>
     }
 
-    @* Main Content with Sidebar *@
+    @* Main Content *@
     <div class="blog-layout" id="latest-posts">
         <div class="blog-main">
         @if (!Model.Items.Any())
@@ -283,83 +283,6 @@
         }
         }
         </div>
-
-        @* Sidebar - Categories & Tags *@
-        <aside class="blog-sidebar">
-            <div class="blog-sidebar__inner blog-sidebar__panel">
-                <h3 class="blog-sidebar__heading">Categories</h3>
-                <div class="categories-list">
-                    @{
-                        var allCategories = new Dictionary<string, (string name, int count)>();
-                        
-                        foreach (var post in allPublishedPosts)
-                        {
-                            if (post?.PostCategories != null && post.PostCategories.Any())
-                            {
-                                foreach (var pc in post.PostCategories.Where(pc => pc?.Category != null))
-                                {
-                                    var slug = pc.Category.Slug;
-                                    if (!allCategories.ContainsKey(slug))
-                                        allCategories[slug] = (pc.Category.Name, 0);
-                                    
-                                    var tuple = allCategories[slug];
-                                    allCategories[slug] = (tuple.name, tuple.count + 1);
-                                }
-                            }
-                        }
-                    }
-                    @if (allCategories.Count > 0)
-                    {
-                        @foreach (var cat in allCategories.OrderByDescending(x => x.Value.count))
-                        {
-                            <a asp-controller="Blog" asp-action="Category" asp-route-slug="@cat.Key" class="category-chip">
-                                <span>@cat.Value.name</span>
-                                <span class="category-chip__count">(@cat.Value.count)</span>
-                            </a>
-                        }
-                    }
-                    else
-                    {
-                        <p class="blog-sidebar__empty">No categories yet</p>
-                    }
-                </div>
-
-                <h3 class="blog-sidebar__heading">Tags</h3>
-                <div class="tags-list">
-                    @{
-                        var allTags = new Dictionary<string, (string name, int count)>();
-                        foreach (var post in allPublishedPosts)
-                        {
-                            if (post?.PostTags != null && post.PostTags.Any())
-                            {
-                                foreach (var pt in post.PostTags.Where(pt => pt?.Tag != null))
-                                {
-                                    var slug = pt.Tag.Slug;
-                                    if (!allTags.ContainsKey(slug))
-                                        allTags[slug] = (pt.Tag.Name, 0);
-                                    
-                                    var tuple = allTags[slug];
-                                    allTags[slug] = (tuple.name, tuple.count + 1);
-                                }
-                            }
-                        }
-                    }
-                    @if (allTags.Count > 0)
-                    {
-                        @foreach (var tag in allTags.OrderByDescending(x => x.Value.count))
-                        {
-                            <a asp-controller="Blog" asp-action="Tag" asp-route-slug="@tag.Key" class="tag-chip">
-                                @tag.Value.name
-                            </a>
-                        }
-                    }
-                    else
-                    {
-                        <p class="blog-sidebar__empty">No tags yet</p>
-                    }
-                </div>
-            </div>
-        </aside>
     </div>
 
     @* Back to Top Button *@

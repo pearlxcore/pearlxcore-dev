@@ -959,7 +959,7 @@ main {
 
 .blog-layout {
   display: grid;
-  grid-template-columns: 1fr 260px;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2xl);
   margin-bottom: var(--space-lg);
 }
@@ -1150,7 +1150,7 @@ main {
 }
 
 .featured-post__title a:hover {
-  border-bottom: 1px solid var(--color-black);
+  border-bottom: 1px solid var(--color-accent);
 }
 
 .featured-post__excerpt {
@@ -1227,7 +1227,7 @@ main {
 }
 
 .post-card__title a:hover {
-  border-bottom: 1px solid var(--color-black);
+  border-bottom: 1px solid var(--color-accent);
 }
 
 .post-card__excerpt {
@@ -1478,6 +1478,12 @@ main {
 
 .article-content li {
   margin-bottom: var(--space-sm);
+  color: inherit;
+  font-weight: 400;
+}
+
+.article-content li::marker {
+  color: inherit;
 }
 
 .article-content blockquote {
@@ -2289,6 +2295,12 @@ textarea.form-control {
 
 .preview-content li {
   margin-bottom: 0.35rem;
+  color: inherit;
+  font-weight: 400;
+}
+
+.preview-content li::marker {
+  color: inherit;
 }
 
 .preview-content .md-center {
@@ -4181,22 +4193,24 @@ textarea.form-control:focus {
 
 .mermaid-overlay__dialog {
   position: relative;
-  width: min(1180px, calc(100vw - 2rem));
-  max-height: calc(100vh - 2rem);
-  padding: 1rem;
-  border-radius: 20px;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  padding: 0.75rem 1rem 1rem;
+  border-radius: 0;
+  border: none;
   background: rgba(15, 23, 42, 0.98);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  overflow: auto;
+  overflow: hidden;
   z-index: 1;
 }
 
 .mermaid-overlay__close {
-  position: sticky;
-  top: 0;
-  margin-left: auto;
-  display: block;
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  z-index: 2;
   border: 1px solid rgba(34, 197, 94, 0.2);
   border-radius: 999px;
   background: rgba(34, 197, 94, 0.12);
@@ -4213,18 +4227,30 @@ textarea.form-control:focus {
 }
 
 .mermaid-overlay__content {
-  margin-top: 0.75rem;
+  margin-top: 0;
+  width: 100%;
+  height: 100%;
   overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  overscroll-behavior: contain;
+  touch-action: auto;
+  user-select: none;
 }
 
 .mermaid-overlay__diagram {
+  display: block;
   cursor: default;
-  min-width: 100%;
+  width: 100%;
+  max-width: none;
 }
 
 .mermaid-overlay__diagram svg {
   width: 100% !important;
   height: auto !important;
+  max-width: none !important;
 }
 
 body.mermaid-overlay-open {
