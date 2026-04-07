@@ -28,61 +28,37 @@
         foreach (var project in projects)
         {
             var detailsUrl = Url.Action("Details", "Projects", new { id = project.Id }) ?? "#";
-            var latestReleaseUrl = GetLatestReleaseUrl(project.GitHubUrl);
-            var downloadBadgeUrl = GetDownloadBadgeUrl(project.GitHubUrl);
 
             <article class="project-card">
-                <a href="@detailsUrl" class="project-card__media-link">
-                    @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
-                    {
-                        <img src="@project.ScreenshotUrl" alt="@project.Title" class="project-card__image" />
-                    }
-                    else
-                    {
-                        <div class="project-card__placeholder">
-                            <span>@project.Title</span>
-                        </div>
-                    }
-                </a>
-
                 <div class="project-card__body">
-                    <h2 class="project-card__title">
-                        <a href="@detailsUrl">@project.Title</a>
-                    </h2>
+                    <div class="project-card__header-row">
+                        <div class="project-card__header-text">
+                            <h2 class="project-card__title">
+                                <a href="@detailsUrl">@project.Title</a>
+                            </h2>
 
-                    <p class="project-card__description">@ProjectPresentationHelper.GetExcerpt(project.Description, 220)</p>
-
-                    <div class="project-card__taxonomy-inline">
-                        <div class="post-taxonomy__chips">
-                            <span class="project-card__badge project-card__badge--platform">@project.Platform</span>
-                            <span class="project-card__badge project-card__badge--type">@project.ProjectType</span>
-                            <span class="project-card__badge @GetStatusBadgeClass(project.Status)">@project.Status</span>
+                            <div class="project-card__taxonomy-inline">
+                                <div class="post-taxonomy__chips">
+                                    <span class="project-card__badge project-card__badge--platform">@project.Platform</span>
+                                    <span class="project-card__badge project-card__badge--type">@project.ProjectType</span>
+                                    <span class="project-card__badge @GetStatusBadgeClass(project.Status)">@project.Status</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="project-card__actions">
-                        @if (!string.IsNullOrWhiteSpace(project.GitHubUrl))
+                    <a href="@detailsUrl" class="project-card__media-link">
+                        @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
                         {
-                            <a href="@project.GitHubUrl" class="btn btn-back-cancel project-card__action" target="_blank" rel="noopener noreferrer">
-                                GitHub
-                            </a>
+                            <img src="@project.ScreenshotUrl" alt="@project.Title" class="project-card__image" />
                         }
-
-                        @if (!string.IsNullOrWhiteSpace(latestReleaseUrl))
+                        else
                         {
-                            <div class="project-card__download-group">
-                                <a href="@latestReleaseUrl" class="btn btn-back-cancel project-card__action" target="_blank" rel="noopener noreferrer">
-                                    Download
-                                </a>
-                                @if (!string.IsNullOrWhiteSpace(downloadBadgeUrl))
-                                {
-                                    <a href="@latestReleaseUrl" class="project-card__download-badge" target="_blank" rel="noopener noreferrer" aria-label="GitHub downloads badge">
-                                        <img src="@downloadBadgeUrl" alt="GitHub All Releases" />
-                                    </a>
-                                }
+                            <div class="project-card__placeholder">
+                                <span>@project.Title</span>
                             </div>
                         }
-                    </div>
+                    </a>
                 </div>
             </article>
         }
@@ -99,15 +75,5 @@
             "inactive" => "project-card__badge--inactive",
             _ => "project-card__badge--archived",
         };
-    }
-
-    private static string GetLatestReleaseUrl(string? githubUrl)
-    {
-        return ProjectPresentationHelper.GetLatestReleaseUrl(githubUrl);
-    }
-
-    private static string GetDownloadBadgeUrl(string? githubUrl)
-    {
-        return ProjectPresentationHelper.GetDownloadBadgeUrl(githubUrl);
     }
 }

@@ -22,19 +22,40 @@
 // GitHub-style Markdown Editor with drag-drop and preview.
 class MarkdownEditor {
     constructor(options = {}) {
+        this.contentElement = options.contentElement || null;
         this.contentSelector = options.contentSelector || '#Content';
         this.apiEndpoint = options.apiEndpoint || '/Admin/Posts/UploadImage';
         this.previewEndpoint = options.previewEndpoint || '/Admin/Posts/PreviewMarkdown';
         this.isUploading = false;
         this.filePicker = null;
+        this.initialized = false;
 
         this.init();
     }
 
+    static initializeAll() {
+        document.querySelectorAll('[data-markdown-editor]').forEach((textarea) => {
+            if (textarea.dataset.markdownEditorInitialized === 'true') {
+                return;
+            }
+
+            textarea.dataset.markdownEditorInitialized = 'true';
+            new MarkdownEditor({
+                contentElement: textarea,
+                apiEndpoint: textarea.dataset.markdownUploadEndpoint || '/Admin/Posts/UploadImage',
+                previewEndpoint: textarea.dataset.markdownPreviewEndpoint || '/Admin/Posts/PreviewMarkdown'
+            });
+        });
+    }
+
     init() {
-        const textarea = document.querySelector(this.contentSelector);
+        const textarea = this.contentElement || document.querySelector(this.contentSelector);
         if (!textarea) {
             console.error('Textarea not found with selector:', this.contentSelector);
+            return;
+        }
+
+        if (textarea.dataset.markdownEditorInitialized === 'true' && this.initialized) {
             return;
         }
 
@@ -98,6 +119,8 @@ class MarkdownEditor {
         if (textarea.value.trim()) {
             this.updatePreview();
         }
+
+        this.initialized = true;
     }
 
     setupTabs(wrapper) {
@@ -412,7 +435,7 @@ class MarkdownEditor {
         });
     }
 
-    uploadImage(file) {
+    async uploadImage(file) {
         this.isUploading = true;
         const fileName = file.name.replace(/\.[^/.]+$/, '');
         const uploadingText = `![Uploading ${fileName}...]()\n`;
@@ -424,18 +447,15 @@ class MarkdownEditor {
 
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 
-        fetch(this.apiEndpoint, {
-            method: 'POST',
-            body: formData,
-            headers: token ? { 'X-CSRF-Token': token } : {}
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(data => {
+        try {
+            const response = await fetch(this.apiEndpoint, {
+                method: 'POST',
+                body: formData,
+                headers: token ? { 'X-CSRF-Token': token } : {}
+            });
+
+            const data = await this.parseJsonResponse(response, 'Image upload');
+
             if (data.success && data.imageUrl) {
                 const newText = `![${fileName}](${data.imageUrl})\n`;
                 const content = this.textarea.value.replace(uploadingText, newText);
@@ -448,15 +468,13 @@ class MarkdownEditor {
                 alert('Image upload failed: ' + (data.message || 'Unknown error'));
                 this.textarea.value = this.textarea.value.replace(uploadingText, '');
             }
-        })
-        .catch(err => {
+        } catch (err) {
             console.error('Upload error:', err);
             alert('Image upload failed: ' + err.message);
             this.textarea.value = this.textarea.value.replace(uploadingText, '');
-        })
-        .finally(() => {
+        } finally {
             this.isUploading = false;
-        });
+        }
     }
 
     insertAtCursor(text) {
@@ -498,37 +516,59 @@ class MarkdownEditor {
         }, true);
     }
 
-    updatePreview() {
+    async updatePreview() {
         const markdown = this.textarea.value;
 
-        fetch(this.previewEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ markdown })
-        })
-        .then(res => res.json())
-        .then(data => {
+        try {
+            const response = await fetch(this.previewEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ markdown })
+            });
+
+            const data = await this.parseJsonResponse(response, 'Markdown preview');
+
             if (data.html) {
                 this.previewContent.innerHTML = data.html;
                 if (window.pearlxMarkdownHighlight) {
                     window.pearlxMarkdownHighlight.highlightRoot(this.previewContent);
                 }
             }
-        })
-        .catch(err => {
+        } catch (err) {
             console.error('Preview error:', err);
-        });
+        }
+    }
+
+    async parseJsonResponse(response, operationName) {
+        const bodyText = await response.text();
+        const previewText = bodyText.trim().slice(0, 240);
+
+        if (!response.ok) {
+            throw new Error(
+                previewText
+                    ? `${operationName} failed with HTTP ${response.status}: ${previewText}`
+                    : `${operationName} failed with HTTP ${response.status}`
+            );
+        }
+
+        if (!bodyText.trim()) {
+            throw new Error(`${operationName} returned an empty response.`);
+        }
+
+        try {
+            return JSON.parse(bodyText);
+        } catch {
+            throw new Error(
+                previewText
+                    ? `${operationName} returned invalid JSON: ${previewText}`
+                    : `${operationName} returned invalid JSON.`
+            );
+        }
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('#Content')) {
-        new MarkdownEditor({
-            contentSelector: '#Content',
-            apiEndpoint: '/Admin/Posts/UploadImage',
-            previewEndpoint: '/Admin/Posts/PreviewMarkdown'
-        });
-    }
+    MarkdownEditor.initializeAll();
 });

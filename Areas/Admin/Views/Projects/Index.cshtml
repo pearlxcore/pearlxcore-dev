@@ -34,6 +34,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                                 <div class="project-admin-card__header">
+                                    <h5 class="card-title admin-surface-card__title mb-1">@project.Title</h5>
                                     <div class="project-admin-card__taxonomy">
                                         <div class="post-taxonomy__chips">
                                             <span class="badge project-admin-card__badge project-admin-card__badge--platform">@project.Platform</span>
@@ -41,10 +42,8 @@
                                             <span class="badge project-admin-card__badge project-admin-card__badge--status">@project.Status</span>
                                         </div>
                                     </div>
-                                    <h5 class="card-title admin-surface-card__title mb-1">@project.Title</h5>
-                                    <p class="card-text admin-surface-card__meta small mb-0">Sort order: @project.SortOrder</p>
                                 </div>
-                                <div class="d-flex flex-column gap-2 align-items-end">
+                                <div class="project-admin-card__actions">
                                     <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-sm btn-back-cancel">Edit</a>
                                     <form method="post" asp-action="Delete" asp-route-id="@project.Id" onsubmit="return confirm('Delete this project?');">
                                         @Html.AntiForgeryToken()
@@ -52,11 +51,6 @@
                                     </form>
                                 </div>
                             </div>
-
-                            @if (!string.IsNullOrWhiteSpace(project.Description))
-                            {
-                                <p class="admin-surface-card__text project-admin-card__excerpt mb-3">@ProjectPresentationHelper.GetExcerpt(project.Description, 200)</p>
-                            }
 
                             @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
                             {
@@ -70,26 +64,6 @@
                                 var downloadBadgeUrl = ProjectPresentationHelper.GetDownloadBadgeUrl(project.GitHubUrl);
                             }
 
-                            <div class="project-admin-card__links">
-                                @if (!string.IsNullOrWhiteSpace(project.GitHubUrl))
-                                {
-                                    <a href="@project.GitHubUrl" class="btn btn-back-cancel btn-sm project-admin-card__link" target="_blank" rel="noopener noreferrer">GitHub</a>
-                                }
-                                @if (!string.IsNullOrWhiteSpace(latestReleaseUrl))
-                                {
-                                    <a href="@latestReleaseUrl" class="btn btn-back-cancel btn-sm project-admin-card__link" target="_blank" rel="noopener noreferrer">Download</a>
-                                    @if (!string.IsNullOrWhiteSpace(downloadBadgeUrl))
-                                    {
-                                        <a href="@latestReleaseUrl" class="project-admin-card__badge-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub downloads badge">
-                                            <img src="@downloadBadgeUrl" alt="GitHub All Releases" class="project-admin-card__badge-image" />
-                                        </a>
-                                    }
-                                }
-                                @if (!string.IsNullOrWhiteSpace(project.ScreenshotUrl))
-                                {
-                                    <a href="@project.ScreenshotUrl" class="btn btn-back-cancel btn-sm project-admin-card__link" target="_blank" rel="noopener noreferrer">Screenshot</a>
-                                }
-                            </div>
                         </div>
                     </div>
                 </div>

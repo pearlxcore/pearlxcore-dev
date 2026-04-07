@@ -86,7 +86,12 @@
                     <small style="font-weight: 400; color: var(--text-muted);">• Markdown supported</small>
                 </label>
                 <span asp-validation-for="Content" class="text-danger"></span>
-                <textarea asp-for="Content" placeholder="Write your post content here...&#10;&#10;Tip: Drag and drop images to insert them!" style="margin-top: 1rem;"></textarea>
+                <textarea asp-for="Content"
+                          data-markdown-editor="true"
+                          data-markdown-upload-endpoint="/Admin/Posts/UploadImage"
+                          data-markdown-preview-endpoint="/Admin/Posts/PreviewMarkdown"
+                          placeholder="Write your post content here...&#10;&#10;Tip: Drag and drop images to insert them!"
+                          style="margin-top: 1rem;"></textarea>
             </div>
         </div>
 

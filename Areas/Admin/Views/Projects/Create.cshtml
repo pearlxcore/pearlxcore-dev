@@ -48,7 +48,12 @@
                     <div class="col-12">
                         <label asp-for="Description" class="form-label admin-form-label">Description</label>
                         <span asp-validation-for="Description" class="text-danger"></span>
-                        <textarea asp-for="Description" class="form-control project-markdown-editor" placeholder="Write the project description here..."></textarea>
+                        <textarea asp-for="Description"
+                                  class="form-control project-markdown-editor"
+                                  data-markdown-editor="true"
+                                  data-markdown-upload-endpoint="/Admin/Posts/UploadImage"
+                                  data-markdown-preview-endpoint="/Admin/Posts/PreviewMarkdown"
+                                  placeholder="Write the project description here..."></textarea>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="GitHubUrl" class="form-label admin-form-label">GitHub Repo URL</label>
@@ -78,15 +83,4 @@
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script src="~/js/editor.js" asp-append-version="true"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (document.querySelector('#Description')) {
-                new MarkdownEditor({
-                    apiEndpoint: '/Admin/Posts/UploadImage',
-                    previewEndpoint: '/Admin/Posts/PreviewMarkdown',
-                    contentSelector: '#Description'
-                });
-            }
-        });
-    </script>
 }
