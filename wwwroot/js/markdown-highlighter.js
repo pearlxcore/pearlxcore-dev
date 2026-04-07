@@ -100,6 +100,93 @@
             .join('\n');
     };
 
+    const ensureMermaidOverlay = () => {
+        let overlay = document.getElementById('mermaidOverlay');
+        if (overlay) {
+            return overlay;
+        }
+
+        overlay = document.createElement('div');
+        overlay.id = 'mermaidOverlay';
+        overlay.className = 'mermaid-overlay';
+        overlay.innerHTML = `
+            <div class="mermaid-overlay__backdrop" data-mermaid-close></div>
+            <div class="mermaid-overlay__dialog" role="dialog" aria-modal="true" aria-label="Mermaid diagram fullscreen view">
+                <button type="button" class="mermaid-overlay__close" data-mermaid-close aria-label="Close diagram">×</button>
+                <div class="mermaid-overlay__content"></div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelectorAll('[data-mermaid-close]').forEach((el) => {
+            el.addEventListener('click', closeMermaidOverlay);
+        });
+
+        overlay.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeMermaidOverlay();
+            }
+        });
+
+        return overlay;
+    };
+
+    const closeMermaidOverlay = () => {
+        const overlay = document.getElementById('mermaidOverlay');
+        if (!overlay) {
+            return;
+        }
+
+        overlay.classList.remove('is-open');
+        document.body.classList.remove('mermaid-overlay-open');
+        const content = overlay.querySelector('.mermaid-overlay__content');
+        if (content) {
+            content.innerHTML = '';
+        }
+    };
+
+    const openMermaidOverlay = (diagram) => {
+        if (!diagram) {
+            return;
+        }
+
+        const overlay = ensureMermaidOverlay();
+        const content = overlay.querySelector('.mermaid-overlay__content');
+        if (!content) {
+            return;
+        }
+
+        const clone = diagram.cloneNode(true);
+        clone.classList.add('mermaid-overlay__diagram');
+        clone.removeAttribute('data-mermaid-fullscreen-bound');
+        content.innerHTML = '';
+        content.appendChild(clone);
+        overlay.classList.add('is-open');
+        document.body.classList.add('mermaid-overlay-open');
+
+        overlay.focus();
+    };
+
+    const bindMermaidFullscreen = (diagram) => {
+        if (!diagram || diagram.dataset.mermaidFullscreenBound === 'true') {
+            return;
+        }
+
+        diagram.dataset.mermaidFullscreenBound = 'true';
+        diagram.classList.add('mermaid--expandable');
+        diagram.addEventListener('click', () => openMermaidOverlay(diagram));
+        diagram.setAttribute('role', 'button');
+        diagram.setAttribute('tabindex', '0');
+        diagram.setAttribute('aria-label', 'Open Mermaid diagram fullscreen');
+        diagram.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openMermaidOverlay(diagram);
+            }
+        });
+    };
+
     const normalizeLanguage = (codeEl) => {
         const className = Array.from(codeEl.classList).find(cls => cls.startsWith('language-'));
         return className ? className.replace('language-', '').toLowerCase() : '';
@@ -157,6 +244,8 @@
             } else if (typeof window.mermaid.init === 'function') {
                 window.mermaid.init(undefined, diagrams);
             }
+
+            diagrams.forEach(bindMermaidFullscreen);
         } catch (error) {
             console.error('Mermaid render failed', error);
         }
@@ -173,5 +262,11 @@
         highlightRoot(document.querySelector('.article-body'));
         highlightRoot(document.querySelector('.preview-content'));
         highlightRoot(document.querySelector('.project-detail__content'));
+    });
+
+    document.addEventListener('click', (event) => {
+        if (event.target && event.target.matches('[data-mermaid-close]')) {
+            closeMermaidOverlay();
+        }
     });
 })();
