@@ -241,10 +241,19 @@ public class PostsController : AdminController
         if (imageFile == null)
             return Json(new { success = false, message = "No file provided" });
 
+        var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        var isSupportedType = AllowedImageExtensions.Contains(fileExtension);
+        var isWithinSizeLimit = imageFile.Length <= MaxImageSizeBytes;
+
+        if (!isSupportedType || !isWithinSizeLimit)
+        {
+            return Json(new { success = false, message = "Invalid file format or size" });
+        }
+
         var imageUrl = await _postService.SavePostImageAsync(imageFile);
 
         if (imageUrl == null)
-            return Json(new { success = false, message = "Invalid file format or size" });
+            return Json(new { success = false, message = "Image upload failed on the server. Please try again." });
 
         return Json(new { success = true, imageUrl = imageUrl });
     }

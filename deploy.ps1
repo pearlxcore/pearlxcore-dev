@@ -91,10 +91,10 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Upload completed successfully" -ForegroundColor Green
 
 if ([string]::IsNullOrWhiteSpace($SudoPassword)) {
-    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' && chmod -R a+rwX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 }
 else {
-    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' && printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
+    ssh "$User@$Server" "chmod -R a+rX '$RemoteReleaseDir' && printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rwX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'"
 }
 
 if ($LASTEXITCODE -ne 0) {
@@ -126,7 +126,7 @@ ln -sfnT '$RemoteAvatarsDir' '$RemoteReleaseDir/wwwroot/images/avatars'
 ln -sfnT '$RemoteCvDir' '$RemoteReleaseDir/wwwroot/files/cv'
 ln -sfnT '$RemoteReleaseDir' '$RemoteLiveLink'
 chmod -R a+rX '$RemoteReleaseDir'
-printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'
+printf '%s\n' '$SudoPassword' | sudo -S -p '' chmod -R a+rwX '$RemotePostsDir' '$RemoteProjectsDir' '$RemoteAvatarsDir' '$RemoteCvDir'
 "@
 
 if ($LASTEXITCODE -ne 0) {
