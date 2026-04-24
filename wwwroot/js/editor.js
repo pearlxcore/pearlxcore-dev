@@ -177,6 +177,10 @@ class MarkdownEditor {
         });
     }
 
+    getAntiForgeryToken() {
+        return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    }
+
     setPreviewMode(isPreview) {
         this.wrapper.classList.toggle('is-previewing', isPreview);
     }
@@ -445,13 +449,13 @@ class MarkdownEditor {
         const formData = new FormData();
         formData.append('imageFile', file);
 
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        const token = this.getAntiForgeryToken();
 
         try {
             const response = await fetch(this.apiEndpoint, {
                 method: 'POST',
                 body: formData,
-                headers: token ? { 'X-CSRF-Token': token } : {}
+                headers: token ? { 'RequestVerificationToken': token } : {}
             });
 
             const data = await this.parseJsonResponse(response, 'Image upload');
@@ -518,12 +522,14 @@ class MarkdownEditor {
 
     async updatePreview() {
         const markdown = this.textarea.value;
+        const token = this.getAntiForgeryToken();
 
         try {
             const response = await fetch(this.previewEndpoint, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'RequestVerificationToken': token } : {})
                 },
                 body: JSON.stringify({ markdown })
             });

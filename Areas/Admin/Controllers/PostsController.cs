@@ -204,7 +204,7 @@ public class PostsController : AdminController
     }
 
     [HttpPost]
-    [IgnoreAntiforgeryToken]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> PreviewMarkdown([FromBody] PreviewRequest request)
     {
         if (string.IsNullOrEmpty(request?.Markdown))
@@ -235,7 +235,7 @@ public class PostsController : AdminController
     }
 
     [HttpPost]
-    [IgnoreAntiforgeryToken]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadImage(IFormFile? imageFile)
     {
         if (imageFile == null)

@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>pearlxcore-dev</AssemblyName>
+    <RootNamespace>pearlxcore.dev</RootNamespace>
     <UserSecretsId>6142b828-14a7-4a2d-a699-bc0cadd4eee6</UserSecretsId>
   </PropertyGroup>
 

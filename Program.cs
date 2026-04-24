@@ -43,6 +43,10 @@ namespace pearlxcore.dev
                 builder.Services.AddControllersWithViews();
                 builder.Services.AddFluentValidationAutoValidation();
                 builder.Services.AddFluentValidationClientsideAdapters();
+                builder.Services.AddAntiforgery(options =>
+                {
+                    options.HeaderName = "RequestVerificationToken";
+                });
 
                 // Register validators
                 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -117,6 +121,27 @@ namespace pearlxcore.dev
 
                 app.UseForwardedHeaders();
                 app.UseHttpsRedirection();
+
+                app.Use(async (context, next) =>
+                {
+                    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+                    context.Response.Headers["X-Frame-Options"] = "DENY";
+                    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+                    context.Response.Headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
+                    context.Response.Headers["Content-Security-Policy"] =
+                        "default-src 'self'; " +
+                        "base-uri 'self'; " +
+                        "frame-ancestors 'none'; " +
+                        "form-action 'self'; " +
+                        "object-src 'none'; " +
+                        "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "img-src 'self' data: https:; " +
+                        "font-src 'self' data: https:; " +
+                        "connect-src 'self' https://cloudflareinsights.com https://static.cloudflareinsights.com;";
+
+                    await next();
+                });
 
                 // Serve uploaded files from a shared folder outside the release tree
                 // so the running service can write them without touching the deployment root.

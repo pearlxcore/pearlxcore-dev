@@ -1,6 +1,6 @@
 ﻿@model pearlxcore.dev.Models.PaginatedList<pearlxcore.dev.Models.Entities.Post>
 @{
-    ViewData["MetaDescription"] = "Articles on homelab infrastructure, ASP.NET Core, and personal engineering projects.";
+    ViewData["MetaDescription"] = "Articles on blog.pearlxcore.dev covering homelab infrastructure, ASP.NET Core, and personal engineering projects.";
     ViewData["Title"] = "Latest Posts";
     var adminProfile = ViewData["AdminProfile"] as pearlxcore.dev.Models.Entities.AdminProfile;
     var allPublishedPosts = (ViewData["AllPublishedPosts"] as IEnumerable<pearlxcore.dev.Models.Entities.Post>) ?? Enumerable.Empty<pearlxcore.dev.Models.Entities.Post>();
@@ -11,7 +11,7 @@
 <div class="blog-container">
     <div class="blog-hero">
         <div class="blog-hero__eyebrow">Homelab logs and engineering notes</div>
-        <h1 class="blog-hero__title">Welcome to pearlxcore.dev</h1>
+        <h1 class="blog-hero__title">Welcome to blog.pearlxcore.dev</h1>
         <p class="blog-hero__subtitle">A personal blog documenting homelab experiments, software engineering, and technical journeys.</p>
     </div>
 

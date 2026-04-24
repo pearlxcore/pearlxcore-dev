@@ -135,7 +135,7 @@ app.Use(async (context, next) =>
 **Current Issue:**
 ```json
 "ConnectionStrings": {
-    "DefaultConnection": "Server=127.0.0.1,1433;Database=pearlxcoreDevDb;User Id=sa;Password=Pxc@B525!;..."
+    "DefaultConnection": "Server=127.0.0.1,1433;Database=pearlxcoreDevDb;User Id=sa;Password=[REDACTED];..."
 }
 ```
 

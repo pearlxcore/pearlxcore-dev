@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="description" content="@ViewData["MetaDescription"] ?? "pearlxcore.dev — a personal blog documenting homelab experiments, software engineering, and technical journeys."" />
+    <meta name="description" content="@((ViewData["MetaDescription"] as string) ?? "blog.pearlxcore.dev — a personal blog documenting homelab experiments, software engineering, and technical journeys.")" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - pearlxcore.dev</title>
+    <title>@ViewData["Title"] - blog.pearlxcore.dev</title>
     <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png" asp-append-version="true" />
     <link rel="shortcut icon" href="~/favicon.ico" asp-append-version="true" />
 
@@ -17,7 +18,7 @@
 
     <header class="header header-fixed" id="mainHeader">
         <div class="header-container">
-            <a class="header-logo" asp-controller="Home" asp-action="Index">pearlxcore.dev</a>
+            <a class="header-logo" asp-controller="Home" asp-action="Index">blog.pearlxcore.dev</a>
             
             <button class="hamburger" id="hamburger" aria-label="Toggle menu">
                 <span></span>
@@ -49,13 +50,20 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-bottom">
-                <p class="footer-copyright">&copy; 2026 pearlxcore.dev. All rights reserved.</p>
+                <p class="footer-copyright">&copy; 2026 blog.pearlxcore.dev. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script src="~/lib/mermaid/mermaid.min.js" asp-append-version="true"></script>
+        @{
+        var cloudflareToken = Configuration["CloudflareWebAnalytics:Token"];
+    }
+    @if (!string.IsNullOrWhiteSpace(cloudflareToken))
+    {
+        <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"@cloudflareToken"}'></script>
+    }
     <script src="~/js/markdown-highlighter.js" asp-append-version="true"></script>
     <script>
         // Reading progress bar
@@ -112,3 +120,6 @@
 
 </body>
 </html>
+
+
+

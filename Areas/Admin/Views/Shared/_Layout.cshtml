@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - pearlxcore.dev</title>
+    <title>@ViewData["Title"] - blog.pearlxcore.dev</title>
     <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png" asp-append-version="true" />
     <link rel="shortcut icon" href="~/favicon.ico" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
@@ -18,7 +18,7 @@
     <header class="header admin-header">
         <div class="header-content">
             <div class="admin-brand">
-                <a class="logo" asp-area="" asp-controller="Home" asp-action="Index">pearlxcore.dev</a>
+                <a class="logo" asp-area="" asp-controller="Home" asp-action="Index">blog.pearlxcore.dev</a>
                 <span class="admin-brand__badge">Admin</span>
             </div>
             <div class="admin-menu">
@@ -49,12 +49,12 @@
 
     <footer class="footer">
         <div class="container">
-            <p class="footer-copyright">&copy; 2026 pearlxcore.dev</p>
+            <p class="footer-copyright">&copy; 2026 blog.pearlxcore.dev</p>
         </div>
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script src="~/lib/mermaid/mermaid.min.js" asp-append-version="true"></script>
     <script src="~/js/markdown-highlighter.js" asp-append-version="true"></script>
     <script>
         // Admin hamburger menu
@@ -125,3 +125,4 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
